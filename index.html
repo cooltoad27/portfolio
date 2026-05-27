@@ -861,12 +861,46 @@ function updateLiveValues(){
 // ── PRICE FETCH ───────────────────────────────────────────────
 function tryFetch(url){ return fetch(url,{cache:'no-store'}).then(function(r){return r.json();}); }
 function fetchPrice(sym){
-  var p = Promise.reject();
-  [
-    function(){return tryFetch('https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=2d').then(function(d){var m=d.chart.result[0].meta;return{price:m.regularMarketPrice,prev:m.chartPreviousClose};});},
-    function(){return tryFetch('https://query2.finance.yahoo.com/v7/finance/quote?symbols='+sym).then(function(d){var q=d.quoteResponse.result[0];return{price:q.regularMarketPrice,prev:q.regularMarketPreviousClose};});}
-  ].forEach(function(fn){ p=p.catch(function(){return fn();}); });
-  return p.catch(function(){return null;});
+  // Try multiple sources — direct Yahoo often blocked on GitHub Pages (CORS)
+  var encoded = encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=2d');
+  var apis = [
+    // 1. allorigins CORS proxy (most reliable for GitHub Pages)
+    function(){
+      return tryFetch('https://api.allorigins.win/get?url='+encoded)
+        .then(function(d){
+          var inner = JSON.parse(d.contents);
+          var m = inner.chart.result[0].meta;
+          return {price:m.regularMarketPrice, prev:m.chartPreviousClose};
+        });
+    },
+    // 2. corsproxy.io
+    function(){
+      return tryFetch('https://corsproxy.io/?'+encoded)
+        .then(function(d){
+          var m = d.chart.result[0].meta;
+          return {price:m.regularMarketPrice, prev:m.chartPreviousClose};
+        });
+    },
+    // 3. Direct Yahoo v8 (works in some browsers/regions)
+    function(){
+      return tryFetch('https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=2d')
+        .then(function(d){
+          var m = d.chart.result[0].meta;
+          return {price:m.regularMarketPrice, prev:m.chartPreviousClose};
+        });
+    },
+    // 4. Direct Yahoo v7
+    function(){
+      return tryFetch('https://query2.finance.yahoo.com/v7/finance/quote?symbols='+sym)
+        .then(function(d){
+          var q = d.quoteResponse.result[0];
+          return {price:q.regularMarketPrice, prev:q.regularMarketPreviousClose};
+        });
+    }
+  ];
+  var p = Promise.reject(new Error('start'));
+  apis.forEach(function(fn){ p = p.catch(function(){ return fn(); }); });
+  return p.catch(function(){ return null; });
 }
 
 async function fetchAll(){
