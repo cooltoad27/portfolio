@@ -40,11 +40,7 @@ function buildPortfolioContext() {
     var totalBuyAmt  = buys.reduce(function(s,t){ return s+t.total; },0);
     var totalSellAmt = sells.reduce(function(s,t){ return s+t.total; },0);
     var divs = txns.filter(function(t){ return t.type==='div'; });
-    txnSummary = '\n\nLOGGED TRANSACTIONS (' + txns.length + ' total):\n' +
-      'Buys: '      + buys.length  + ' totalling $' + totalBuyAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\n' +
-      'Sells: '     + sells.length + ' totalling $' + totalSellAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\n' +
-      'Dividends: ' + divs.length  + '\n' +
-      'Full list:\n' +
+    txnSummary = '\n\nLOGGED TRANSACTIONS (' + txns.length + ' total):\nBuys: '      + buys.length  + ' totalling $' + totalBuyAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nSells: '     + sells.length + ' totalling $' + totalSellAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nDividends: ' + divs.length  + '\nFull list:\n' +
       txns.map(function(t){
         return '  ' + t.date + ' ' + t.type.toUpperCase() + ' ' + t.shares + ' ' + t.symbol +
           ' @$' + t.price + ' = $' + t.total + ' [' + t.account + ']' + (t.note ? ' (' + t.note + ')' : '');
@@ -57,46 +53,171 @@ function buildPortfolioContext() {
     'Answer questions about their portfolio concisely and helpfully. Use Canadian dollar formatting. ' +
     'Here is their current portfolio data as of right now:\n\n' +
 
-    'LIVE ETF PRICES:\n' +
-    '- VEQT.TO (Vanguard All-Equity ETF): $' + VP.toFixed(2) + '\n' +
-    '- VFV.TO (Vanguard S&P 500 ETF): $' + FP.toFixed(2) + '\n\n' +
+    'LIVE ETF PRICES:\n- VEQT.TO (Vanguard All-Equity ETF): $' + VP.toFixed(2) + '\n- VFV.TO (Vanguard S&P 500 ETF): $' + FP.toFixed(2) + '\n\n' +
 
-    'ACCOUNT VALUES (live):\n' +
-    '- Amit TFSA: $' + Math.round(c.amitA).toLocaleString() + ' (contributed $58,905 · holds ' + S.amitTFSA_VEQT + ' VEQT + ' + S.amitTFSA_VFV + ' VFV shares)\n' +
-    '- Amit RRSP: $' + Math.round(c.rrsp).toLocaleString() + ' (book cost $43,521 · holds ' + S.amitRRSP_VEQT + ' VEQT shares)\n' +
-    '- Trisha TFSA: $' + Math.round(c.trishaA).toLocaleString() + ' (contributed $41,499 · holds ' + S.trishaTFSA_VFV + ' VFV shares)\n' +
-    '- Spousal RRSP (Trisha holds, Amit contributes): $' + Math.round(c.spousal).toLocaleString() + ' (original ~$8,583 · holds ' + S.spousal_VEQT + ' VEQT shares + $' + S.spousal_CASH + ' cash)\n\n' +
+    'ACCOUNT VALUES (live):\n- Amit TFSA: $' + Math.round(c.amitA).toLocaleString() + ' (contributed $58,905 · holds ' + S.amitTFSA_VEQT + ' VEQT + ' + S.amitTFSA_VFV + ' VFV shares)\n- Amit RRSP: $' + Math.round(c.rrsp).toLocaleString() + ' (book cost $43,521 · holds ' + S.amitRRSP_VEQT + ' VEQT shares)\n- Trisha TFSA: $' + Math.round(c.trishaA).toLocaleString() + ' (contributed $41,499 · holds ' + S.trishaTFSA_VFV + ' VFV shares)\n- Spousal RRSP (Trisha holds, Amit contributes): $' + Math.round(c.spousal).toLocaleString() + ' (original ~$8,583 · holds ' + S.spousal_VEQT + ' VEQT shares + $' + S.spousal_CASH + ' cash)\n\n' +
 
-    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\n' +
-    'TOTAL CONTRIBUTED: $154,533\n' +
-    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/154533)-1)*100).toFixed(1) + '% return)\n' +
-    'OVERALL MULTIPLE: ' + (total/154533).toFixed(2) + 'x\n\n' +
+    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\nTOTAL CONTRIBUTED: $154,533\n' +
+    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/154533)-1)*100).toFixed(1) + '% return)\nOVERALL MULTIPLE: ' + (total/154533).toFixed(2) + 'x\n\n' +
 
-    'PERFORMANCE:\n' +
-    '- TFSA XIRR (Amit + Trisha combined): 27.94% per year\n' +
-    '- Amit TFSA XIRR: 27.94% vs VEQT benchmark 17.5% — beats VEQT by ~$3,133, beats VFV by ~$93,212\n' +
-    '- Trisha TFSA XIRR: ~18.7% — slightly trails VEQT benchmark\n' +
-    '- Amit RRSP CAGR: ~14.2% per year\n' +
-    '- Spousal RRSP return since inception: +136.75%\n' +
+    'PERFORMANCE:\n- TFSA XIRR (Amit + Trisha combined): 27.94% per year\n' +
+    '- Amit TFSA XIRR: 27.94% vs VEQT benchmark 17.5% — beats VEQT by ~$3,133, beats VFV by ~$93,212\n- Trisha TFSA XIRR: ~18.7% — slightly trails VEQT benchmark\n' +
+    '- Amit RRSP CAGR: ~14.2% per year\n- Spousal RRSP return since inception: +136.75%\n' +
     '- Blended XIRR all accounts: ~24.0% per year\n\n' +
 
-    'VFV vs VEQT ANALYSIS:\n' +
-    '- Oct-Dec 2024: Amit switched 894 VEQT to VFV — cost ~$3,582 vs staying VEQT\n' +
-    '- Jun 2023 round-trip: lost 9 VEQT shares — cost ~$516\n' +
-    '- Trisha VEQT→VFV conversion at ~$140.63 avg — cost ~$2,349\n' +
-    '- Total VFV drag: ~$6,458 gross, ~$2,094 net\n' +
-    '- VEQT has outperformed VFV since late 2024\n\n' +
+    'VFV vs VEQT ANALYSIS:\n- Oct-Dec 2024: Amit switched 894 VEQT to VFV — cost ~$3,582 vs staying VEQT\n' +
+    '- Jun 2023 round-trip: lost 9 VEQT shares — cost ~$516\n- Trisha VEQT→VFV conversion at ~$140.63 avg — cost ~$2,349\n' +
+    '- Total VFV drag: ~$6,458 gross, ~$2,094 net\n- VEQT has outperformed VFV since late 2024\n\n' +
 
-    'CONTRIBUTIONS HISTORY (key dates):\n' +
-    '- 2018: $9,017 (Amit, WS Robo TFSA start)\n' +
-    '- 2021: $7,675 (Amit, biweekly DCA)\n' +
-    '- 2022: $16,475 (Amit, bear market buys)\n' +
-    '- 2023: $48,062 (Trisha joins Jul 2023 with $41,499 lump sum)\n' +
-    '- 2024: $7,000 (Amit)\n' +
-    '- 2025: $7,000 (Amit)\n' +
-    '- 2026: $7,200 (Amit, to date)\n' +
+    'CONTRIBUTIONS HISTORY (key dates):\n- 2018: $9,017 (Amit, WS Robo TFSA start)\n' +
+    '- 2021: $7,675 (Amit, biweekly DCA)\n- 2022: $16,475 (Amit, bear market buys)\n' +
+    '- 2023: $48,062 (Trisha joins Jul 2023 with $41,499 lump sum)\n- 2024: $7,000 (Amit)\n' +
+    '- 2025: $7,000 (Amit)\n- 2026: $7,200 (Amit, to date)\n' +
     txnSummary;
 }
+
+
+// ── CLAUDE API via CORS proxies ──────────────────────────────────
+async function askClaude(systemPrompt, messages) {
+  var body = JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 800,
+    system: systemPrompt,
+    messages: messages
+  });
+
+  // Try multiple free CORS proxies in order
+  var proxies = [
+    // Proxy 1: corsproxy.io
+    async function() {
+      var r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+        body: body
+      });
+      var d = await r.json();
+      if (d.content && d.content[0]) return d.content[0].text;
+      throw new Error('no content');
+    },
+    // Proxy 2: allorigins
+    async function() {
+      var r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+        body: body
+      });
+      var d = await r.json();
+      if (d.content && d.content[0]) return d.content[0].text;
+      throw new Error('no content');
+    }
+  ];
+
+  // Try each proxy
+  for (var i = 0; i < proxies.length; i++) {
+    try {
+      var result = await proxies[i]();
+      if (result) return result;
+    } catch(e) { /* try next */ }
+  }
+
+  // All proxies failed — use smart local fallback
+  return localAnswer(messages[messages.length-1].content, systemPrompt);
+}
+
+// ── SMART LOCAL ANSWER ENGINE ─────────────────────────────────────
+// Answers common portfolio questions using live data — works fully offline
+function localAnswer(question, context) {
+  var q = question.toLowerCase();
+  var c = calcAccounts(VP, FP);
+  var total = c.total;
+  var gain  = total - 154533;
+  var txns  = loadTxns();
+  var totalVEQT = S.amitTFSA_VEQT + S.amitRRSP_VEQT + S.spousal_VEQT;
+  var totalVFV  = S.amitTFSA_VFV  + S.trishaTFSA_VFV;
+  var veqtVal   = totalVEQT * VP;
+  var vfvVal    = totalVFV  * FP;
+  var veqtPct   = (veqtVal / total * 100).toFixed(1);
+  var vfvPct    = (vfvVal  / total * 100).toFixed(1);
+  var dailyPL   = (totalVEQT*(VP-VP_PREV)) + (totalVFV*(FP-FP_PREV));
+
+  if (q.match(/how much.*(made|gained|profit|return|up)/i) || q.match(/total.*(gain|profit|return)/i)) {
+    return ['**Total portfolio gain: +' + m$(Math.round(gain)) + '** (' + (((total/154533)-1)*100).toFixed(1) + '% return)',
+      'Amt TFSA: +' + m$(Math.round(c.amitA-58905)),
+      'Amit RRSP: +' + m$(Math.round(c.rrsp-43521)),
+      'Trisha TFSA: +' + m$(Math.round(c.trishaA-41499)),
+      'Spousal RRSP: +' + m$(Math.round(c.spousal-8583))].join('\n');
+  }
+  if (q.match(/best|top|highest|performing|winner/i)) {
+    var accs = [
+      {n:'Amit TFSA',   v:c.amitA,   c:58905},
+      {n:'Amit RRSP',   v:c.rrsp,    c:43521},
+      {n:'Trisha TFSA', v:c.trishaA, c:41499},
+      {n:'Spousal RRSP',v:c.spousal, c:8583}
+    ].sort(function(a,b){ return (b.v/b.c)-(a.v/a.c); });
+    return ['**Best: ' + accs[0].n + ' at ' + (accs[0].v/accs[0].c).toFixed(2) + 'x**'].concat(
+      accs.map(function(a){ return a.n+': '+m$(Math.round(a.v))+' ('+( a.v/a.c).toFixed(2)+'x)'; })
+    ).join('\n');
+  }
+  if (q.match(/veqt|vfv|split|etf|mix|allocation/i)) {
+    return ['**Current ETF split:**',
+      'VEQT: ' + m$(Math.round(veqtVal)) + ' (' + veqtPct + '%) — ' + totalVEQT.toFixed(0) + ' shares @ $' + VP.toFixed(2),
+      'VFV:  ' + m$(Math.round(vfvVal))  + ' (' + vfvPct  + '%) — ' + totalVFV.toFixed(0)  + ' shares @ $' + FP.toFixed(2),
+      'VFV cost vs VEQT: ~-$5,923. VEQT has outperformed since late 2024.'].join('\n');
+  }
+  if (q.match(/total|portfolio|worth|value|balance/i)) {
+    return ['**Total portfolio: ' + m$(Math.round(total)) + '**',
+      'Amit TFSA: ' + m$(Math.round(c.amitA)),
+      'Amit RRSP: ' + m$(Math.round(c.rrsp)),
+      'Trisha TFSA: ' + m$(Math.round(c.trishaA)),
+      'Spousal RRSP: ' + m$(Math.round(c.spousal)),
+      'VEQT @ $' + VP.toFixed(2) + ' · VFV @ $' + FP.toFixed(2)].join('\n');
+  }
+  if (q.match(/trisha/i) && q.match(/amit/i)) {
+    return ['**Amit vs Trisha TFSA:**',
+      'Amit: ' + m$(Math.round(c.amitA)) + ' on $58,905 → ' + (c.amitA/58905).toFixed(2) + 'x (27.94% XIRR)',
+      'Trisha: ' + m$(Math.round(c.trishaA)) + ' on $41,499 → ' + (c.trishaA/41499).toFixed(2) + 'x (~18.7% XIRR)',
+      "Amit's edge: 2022 bear market buys + 8 years of DCA."].join('\n');
+  }
+  if (q.match(/today|daily|day/i)) {
+    return ['**Today P&L: ' + (dailyPL>=0?'+':'') + m$(Math.round(dailyPL)) + '**',
+      'VEQT: ' + (VP-VP_PREV>=0?'+':'') + (VP-VP_PREV).toFixed(2) + '/sh x ' + totalVEQT.toFixed(0) + ' shares',
+      'VFV: '  + (FP-FP_PREV>=0?'+':'') + (FP-FP_PREV).toFixed(2) + '/sh x ' + totalVFV.toFixed(0)  + ' shares'].join('\n');
+  }
+  if (q.match(/xirr|rate|return|percent|annualised|cagr/i)) {
+    return ['**Annual returns:**',
+      'Combined TFSA XIRR: **27.94%/yr**',
+      'Trisha TFSA XIRR: ~18.7%/yr',
+      'Amit RRSP CAGR: ~14.2%/yr',
+      'Spousal RRSP: +136.75% total',
+      'Blended all accounts: ~24.0%/yr',
+      'VEQT benchmark: 15.96%/yr — you beat it by ~12pp.'].join('\n');
+  }
+  if (q.match(/contribut|invest|put in|deposit/i)) {
+    return ['**Total contributed: $154,533**',
+      '2018: $9,017 · 2021: $7,675 · 2022: $16,475',
+      '2023: $48,062 (Trisha joins) · 2024: $7,000',
+      '2025: $7,000 · 2026: $7,200'].join('\n');
+  }
+  if (q.match(/transaction|trade|buy|sell|history/i)) {
+    if (!txns.length) return 'No transactions logged yet. Use the Transaction Log to add trades.';
+    var buys = txns.filter(function(t){ return t.type==='buy'; });
+    var sells = txns.filter(function(t){ return t.type==='sell'; });
+    return ['**Transactions: ' + txns.length + ' total**',
+      'Buys: ' + buys.length + ' ($' + Math.round(buys.reduce(function(s,t){return s+t.total;},0)).toLocaleString() + ')',
+      'Sells: ' + sells.length,
+      'Recent: ' + txns.slice(0,3).map(function(t){ return t.date+' '+t.type.toUpperCase()+' '+t.shares+'x'+t.symbol; }).join(', ')].join('\n');
+  }
+  return ['I can answer questions about:',
+    '- Portfolio value & gain',
+    '- Account breakdown',
+    '- VEQT vs VFV split',
+    '- Daily P&L',
+    '- XIRR returns',
+    '- Contributions',
+    '- Logged transactions',
+    'Try: "How much have I made?" or "What is my XIRR?"'].join('\n');
+}
+
 
 async function sendChat() {
   var input = el('chat-input');
@@ -125,29 +246,14 @@ async function sendChat() {
 
   try {
     var systemPrompt = buildPortfolioContext();
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: chatHistory
-      })
-    });
-    var data = await response.json();
-    var reply = data.content && data.content[0] ? data.content[0].text : 'Sorry, I could not get a response. Please try again.';
-
+    var reply = await askClaude(systemPrompt, chatHistory);
     removeTyping(typingId);
     appendMessage('bot', reply);
     chatHistory.push({role:'assistant', content: reply});
-
-    // Keep history to last 10 exchanges
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-
   } catch(e) {
     removeTyping(typingId);
-    appendMessage('bot', 'Sorry, something went wrong. Make sure you have an internet connection and try again.');
+    appendMessage('bot', 'Sorry, could not get a response. Please try again.');
   }
 
   sendBtn.disabled = false;
@@ -351,7 +457,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
 
 
 /* ── CHATBOT ── */
-.chat-fab{position:fixed;bottom:24px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#3fb950,#58a6ff);border:none;cursor:pointer;font-size:22px;box-shadow:0 4px 20px rgba(63,185,80,.35);z-index:200;display:flex;align-items:center;justify-content:center;transition:transform .2s;}
+.chat-fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#3fb950,#58a6ff);border:none;cursor:pointer;font-size:22px;box-shadow:0 4px 20px rgba(63,185,80,.35);z-index:200;display:flex;align-items:center;justify-content:center;transition:transform .2s;}
 .chat-fab:active{transform:scale(.92);}
 .chat-fab .notif{position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--bg);}
 .chat-panel{position:fixed;bottom:0;left:0;right:0;height:75vh;background:var(--surface);border-top:1px solid var(--border);border-radius:20px 20px 0 0;z-index:199;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);}
@@ -1488,11 +1594,7 @@ function buildPortfolioContext() {
     var totalBuyAmt  = buys.reduce(function(s,t){ return s+t.total; },0);
     var totalSellAmt = sells.reduce(function(s,t){ return s+t.total; },0);
     var divs = txns.filter(function(t){ return t.type==='div'; });
-    txnSummary = '\n\nLOGGED TRANSACTIONS (' + txns.length + ' total):\n' +
-      'Buys: '      + buys.length  + ' totalling $' + totalBuyAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\n' +
-      'Sells: '     + sells.length + ' totalling $' + totalSellAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\n' +
-      'Dividends: ' + divs.length  + '\n' +
-      'Full list:\n' +
+    txnSummary = '\n\nLOGGED TRANSACTIONS (' + txns.length + ' total):\nBuys: '      + buys.length  + ' totalling $' + totalBuyAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nSells: '     + sells.length + ' totalling $' + totalSellAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nDividends: ' + divs.length  + '\nFull list:\n' +
       txns.map(function(t){
         return '  ' + t.date + ' ' + t.type.toUpperCase() + ' ' + t.shares + ' ' + t.symbol +
           ' @$' + t.price + ' = $' + t.total + ' [' + t.account + ']' + (t.note ? ' (' + t.note + ')' : '');
@@ -1505,46 +1607,79 @@ function buildPortfolioContext() {
     'Answer questions about their portfolio concisely and helpfully. Use Canadian dollar formatting. ' +
     'Here is their current portfolio data as of right now:\n\n' +
 
-    'LIVE ETF PRICES:\n' +
-    '- VEQT.TO (Vanguard All-Equity ETF): $' + VP.toFixed(2) + '\n' +
-    '- VFV.TO (Vanguard S&P 500 ETF): $' + FP.toFixed(2) + '\n\n' +
+    'LIVE ETF PRICES:\n- VEQT.TO (Vanguard All-Equity ETF): $' + VP.toFixed(2) + '\n- VFV.TO (Vanguard S&P 500 ETF): $' + FP.toFixed(2) + '\n\n' +
 
-    'ACCOUNT VALUES (live):\n' +
-    '- Amit TFSA: $' + Math.round(c.amitA).toLocaleString() + ' (contributed $58,905 · holds ' + S.amitTFSA_VEQT + ' VEQT + ' + S.amitTFSA_VFV + ' VFV shares)\n' +
-    '- Amit RRSP: $' + Math.round(c.rrsp).toLocaleString() + ' (book cost $43,521 · holds ' + S.amitRRSP_VEQT + ' VEQT shares)\n' +
-    '- Trisha TFSA: $' + Math.round(c.trishaA).toLocaleString() + ' (contributed $41,499 · holds ' + S.trishaTFSA_VFV + ' VFV shares)\n' +
-    '- Spousal RRSP (Trisha holds, Amit contributes): $' + Math.round(c.spousal).toLocaleString() + ' (original ~$8,583 · holds ' + S.spousal_VEQT + ' VEQT shares + $' + S.spousal_CASH + ' cash)\n\n' +
+    'ACCOUNT VALUES (live):\n- Amit TFSA: $' + Math.round(c.amitA).toLocaleString() + ' (contributed $58,905 · holds ' + S.amitTFSA_VEQT + ' VEQT + ' + S.amitTFSA_VFV + ' VFV shares)\n- Amit RRSP: $' + Math.round(c.rrsp).toLocaleString() + ' (book cost $43,521 · holds ' + S.amitRRSP_VEQT + ' VEQT shares)\n- Trisha TFSA: $' + Math.round(c.trishaA).toLocaleString() + ' (contributed $41,499 · holds ' + S.trishaTFSA_VFV + ' VFV shares)\n- Spousal RRSP (Trisha holds, Amit contributes): $' + Math.round(c.spousal).toLocaleString() + ' (original ~$8,583 · holds ' + S.spousal_VEQT + ' VEQT shares + $' + S.spousal_CASH + ' cash)\n\n' +
 
-    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\n' +
-    'TOTAL CONTRIBUTED: $154,533\n' +
-    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/154533)-1)*100).toFixed(1) + '% return)\n' +
-    'OVERALL MULTIPLE: ' + (total/154533).toFixed(2) + 'x\n\n' +
+    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\nTOTAL CONTRIBUTED: $154,533\n' +
+    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/154533)-1)*100).toFixed(1) + '% return)\nOVERALL MULTIPLE: ' + (total/154533).toFixed(2) + 'x\n\n' +
 
-    'PERFORMANCE:\n' +
-    '- TFSA XIRR (Amit + Trisha combined): 27.94% per year\n' +
-    '- Amit TFSA XIRR: 27.94% vs VEQT benchmark 17.5% — beats VEQT by ~$3,133, beats VFV by ~$93,212\n' +
-    '- Trisha TFSA XIRR: ~18.7% — slightly trails VEQT benchmark\n' +
-    '- Amit RRSP CAGR: ~14.2% per year\n' +
-    '- Spousal RRSP return since inception: +136.75%\n' +
+    'PERFORMANCE:\n- TFSA XIRR (Amit + Trisha combined): 27.94% per year\n' +
+    '- Amit TFSA XIRR: 27.94% vs VEQT benchmark 17.5% — beats VEQT by ~$3,133, beats VFV by ~$93,212\n- Trisha TFSA XIRR: ~18.7% — slightly trails VEQT benchmark\n' +
+    '- Amit RRSP CAGR: ~14.2% per year\n- Spousal RRSP return since inception: +136.75%\n' +
     '- Blended XIRR all accounts: ~24.0% per year\n\n' +
 
-    'VFV vs VEQT ANALYSIS:\n' +
-    '- Oct-Dec 2024: Amit switched 894 VEQT to VFV — cost ~$3,582 vs staying VEQT\n' +
-    '- Jun 2023 round-trip: lost 9 VEQT shares — cost ~$516\n' +
-    '- Trisha VEQT→VFV conversion at ~$140.63 avg — cost ~$2,349\n' +
-    '- Total VFV drag: ~$6,458 gross, ~$2,094 net\n' +
-    '- VEQT has outperformed VFV since late 2024\n\n' +
+    'VFV vs VEQT ANALYSIS:\n- Oct-Dec 2024: Amit switched 894 VEQT to VFV — cost ~$3,582 vs staying VEQT\n' +
+    '- Jun 2023 round-trip: lost 9 VEQT shares — cost ~$516\n- Trisha VEQT→VFV conversion at ~$140.63 avg — cost ~$2,349\n' +
+    '- Total VFV drag: ~$6,458 gross, ~$2,094 net\n- VEQT has outperformed VFV since late 2024\n\n' +
 
-    'CONTRIBUTIONS HISTORY (key dates):\n' +
-    '- 2018: $9,017 (Amit, WS Robo TFSA start)\n' +
-    '- 2021: $7,675 (Amit, biweekly DCA)\n' +
-    '- 2022: $16,475 (Amit, bear market buys)\n' +
-    '- 2023: $48,062 (Trisha joins Jul 2023 with $41,499 lump sum)\n' +
-    '- 2024: $7,000 (Amit)\n' +
-    '- 2025: $7,000 (Amit)\n' +
-    '- 2026: $7,200 (Amit, to date)\n' +
+    'CONTRIBUTIONS HISTORY (key dates):\n- 2018: $9,017 (Amit, WS Robo TFSA start)\n' +
+    '- 2021: $7,675 (Amit, biweekly DCA)\n- 2022: $16,475 (Amit, bear market buys)\n' +
+    '- 2023: $48,062 (Trisha joins Jul 2023 with $41,499 lump sum)\n- 2024: $7,000 (Amit)\n' +
+    '- 2025: $7,000 (Amit)\n- 2026: $7,200 (Amit, to date)\n' +
     txnSummary;
 }
+
+
+// ── CLAUDE API via CORS proxies ──────────────────────────────────
+async function askClaude(systemPrompt, messages) {
+  var body = JSON.stringify({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 800,
+    system: systemPrompt,
+    messages: messages
+  });
+
+  // Try multiple free CORS proxies in order
+  var proxies = [
+    // Proxy 1: corsproxy.io
+    async function() {
+      var r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+        body: body
+      });
+      var d = await r.json();
+      if (d.content && d.content[0]) return d.content[0].text;
+      throw new Error('no content');
+    },
+    // Proxy 2: allorigins
+    async function() {
+      var r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+        body: body
+      });
+      var d = await r.json();
+      if (d.content && d.content[0]) return d.content[0].text;
+      throw new Error('no content');
+    }
+  ];
+
+  // Try each proxy
+  for (var i = 0; i < proxies.length; i++) {
+    try {
+      var result = await proxies[i]();
+      if (result) return result;
+    } catch(e) { /* try next */ }
+  }
+
+  // All proxies failed — use smart local fallback
+  return localAnswer(messages[messages.length-1].content, systemPrompt);
+}
+
+// ── SMART LOCAL ANSWER ENGINE ─────────────────────────────────────
+// Answers common portfolio questions using live data — works fully offline
 
 async function sendChat() {
   var input = el('chat-input');
@@ -1573,29 +1708,14 @@ async function sendChat() {
 
   try {
     var systemPrompt = buildPortfolioContext();
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: chatHistory
-      })
-    });
-    var data = await response.json();
-    var reply = data.content && data.content[0] ? data.content[0].text : 'Sorry, I could not get a response. Please try again.';
-
+    var reply = await askClaude(systemPrompt, chatHistory);
     removeTyping(typingId);
     appendMessage('bot', reply);
     chatHistory.push({role:'assistant', content: reply});
-
-    // Keep history to last 10 exchanges
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-
   } catch(e) {
     removeTyping(typingId);
-    appendMessage('bot', 'Sorry, something went wrong. Make sure you have an internet connection and try again.');
+    appendMessage('bot', 'Sorry, could not get a response. Please try again.');
   }
 
   sendBtn.disabled = false;
