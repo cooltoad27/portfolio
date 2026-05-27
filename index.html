@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>Did You Beat VEQT?</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#080c10; --surface:#0d1117; --card:#161b22; --border:#21262d;
+  --text:#e6edf3; --muted:#7d8590; --dim:#484f58;
+  --green:#3fb950; --teal:#26d97f; --blue:#58a6ff;
+  --purple:#bc8cff; --orange:#f0883e; --yellow:#e3b341; --red:#f85149;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Code',monospace;min-height:100vh;padding:20px 16px 40px;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* LIVE DOT */
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:glow 2s infinite;flex-shrink:0;}
+@keyframes glow{0%,100%{opacity:1;box-shadow:0 0 8px var(--green);}50%{opacity:.4;box-shadow:none;}}
+
+/* REFRESH BUTTON */
+.refresh-btn{background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.3);border-radius:6px;padding:4px 10px;font-size:10px;color:var(--green);cursor:pointer;font-family:inherit;transition:all .15s;}
+.refresh-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* PRICE STRIP */
+.price-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.ptile{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.ptile-sym{color:var(--dim);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.ptile-price{font-size:20px;font-weight:700;margin-bottom:1px;}
+.ptile-chg{font-size:10px;}
+.up{color:var(--green);} .dn{color:var(--red);}
+.blink{animation:glow 1.5s infinite;color:var(--muted);}
+
+/* ACCOUNT SELECTOR */
+.acct-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;}
+.acct-btn{background:var(--card);border:2px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;text-align:left;font-family:inherit;transition:all .15s;}
+.acct-btn.active{background:rgba(88,166,255,.1);border-color:var(--blue);}
+.acct-btn[data-color="green"].active{background:rgba(63,185,80,.1);border-color:var(--green);}
+.acct-btn[data-color="orange"].active{background:rgba(240,136,62,.1);border-color:var(--orange);}
+.ab-label{font-size:10px;font-weight:700;margin-bottom:1px;}
+.ab-period{color:var(--dim);font-size:8px;margin-bottom:5px;}
+.ab-xirr{font-size:17px;font-weight:800;}
+.ab-xirr-lbl{color:var(--dim);font-size:8px;}
+.ab-verdict{font-size:9px;font-weight:700;margin-top:4px;}
+
+/* SECTION HEADERS */
+.sec{color:var(--text);font-size:12px;font-weight:700;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);letter-spacing:.3px;}
+.sec-sub{color:var(--muted);font-size:10px;margin:-4px 0 10px;}
+
+/* CHART WRAPS */
+.chart-wrap{margin-bottom:8px;}
+
+/* DIFF CALLOUTS */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.diff-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.diff-lbl{color:var(--dim);font-size:9px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.diff-val{font-size:18px;font-weight:800;margin-bottom:2px;}
+.diff-pp{font-size:11px;}
+
+/* SCORECARD */
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;}
+.score-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;}
+.score-lbl{color:var(--dim);font-size:8px;text-transform:uppercase;letter-spacing:1px;}
+.score-val{font-size:12px;font-weight:700;margin-top:3px;}
+
+/* SUMMARY CARD */
+.summary-card{background:var(--card);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+.summary-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.summary-name{font-size:14px;font-weight:800;}
+.verdict-badge{font-size:11px;font-weight:700;border-radius:5px;padding:3px 8px;}
+.summary-text{color:var(--muted);font-size:11px;line-height:1.7;}
+
+/* INSIGHT BOX */
+.insight{background:var(--surface);border:1px solid var(--yellow);border-radius:8px;padding:12px 14px;margin-bottom:16px;}
+.insight-title{color:var(--yellow);font-weight:700;font-size:12px;margin-bottom:8px;}
+.insight-text{color:var(--muted);font-size:11px;line-height:1.7;}
+
+/* BOTTOM TABLE */
+.btbl{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.btbl-hdr{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;background:var(--surface);padding:8px 12px;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+.btbl-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;padding:11px 12px;border-top:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.btbl-row:hover,.btbl-row.active{background:rgba(88,166,255,.06);}
+.btbl-name{font-size:11px;font-weight:700;}
+.btbl-period{color:var(--dim);font-size:8px;}
+.btbl-val{font-size:13px;font-weight:800;text-align:right;align-self:center;}
+
+/* ACCOUNT TILES */
+.th-stat{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 10px;}
+.th-stat-lbl{color:var(--dim);font-size:8px;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.th-stat-val{font-size:13px;font-weight:700;color:var(--text);}
+
+.fn{margin-top:16px;padding-top:10px;border-top:1px solid var(--border);color:var(--dim);font-size:9px;text-align:center;line-height:1.7;}
+
+/* TRANSACTIONS */
+.txn-section{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.txn-toggle{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;user-select:none;transition:background .15s;}
+.txn-toggle:active{background:var(--surface);}
+.txn-toggle-title{font-size:13px;font-weight:700;color:var(--text);}
+.txn-toggle-meta{font-size:9px;color:var(--dim);margin-top:2px;}
+.txn-chevron{color:var(--muted);font-size:11px;transition:transform .2s;}
+.txn-chevron.open{transform:rotate(180deg);}
+.txn-body{display:none;border-top:1px solid var(--border);}
+.txn-body.open{display:block;}
+
+/* ADD FORM */
+.txn-form{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface);}
+.txn-form-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+.field-lbl{font-size:8px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.field-inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:11px;color:var(--text);font-family:inherit;outline:none;transition:border-color .15s;}
+.field-inp:focus{border-color:var(--blue);}
+.field-inp option{background:var(--card);color:var(--text);}
+.add-btn{width:100%;background:var(--green);border:none;border-radius:6px;padding:9px;font-size:11px;font-weight:700;color:#0d1117;cursor:pointer;font-family:inherit;transition:opacity .15s;}
+.add-btn:active{opacity:.8;}
+
+/* TRANSACTION LIST */
+.txn-list{padding:0 16px 8px;}
+.txn-filters{display:flex;gap:6px;padding:10px 0 8px;flex-wrap:wrap;}
+.txn-filter{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:9px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;}
+.txn-filter.active{background:var(--blue);border-color:var(--blue);color:#0d1117;}
+.txn-empty{padding:20px 0;text-align:center;color:var(--dim);font-size:11px;}
+.txn-row{display:grid;grid-template-columns:80px 50px 1fr auto auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:10px;}
+.txn-row:last-child{border-bottom:none;}
+.txn-date{font-family:inherit;color:var(--muted);}
+.txn-type{display:inline-block;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;text-align:center;}
+.txn-type.buy{background:rgba(63,185,80,.15);color:var(--green);}
+.txn-type.sell{background:rgba(248,81,73,.15);color:var(--red);}
+.txn-type.div{background:rgba(227,179,65,.15);color:var(--yellow);}
+.txn-sym{font-weight:700;}
+.txn-detail{color:var(--muted);font-size:9px;}
+.txn-amount{text-align:right;font-weight:700;}
+.txn-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;padding:2px 4px;transition:color .15s;}
+.txn-del:hover{color:var(--red);}
+.txn-summary{display:flex;gap:12px;padding:10px 16px;background:var(--surface);border-top:1px solid var(--border);flex-wrap:wrap;}
+.txn-sum-item{font-size:9px;color:var(--muted);}
+.txn-sum-item span{color:var(--text);font-weight:700;margin-left:3px;}
+.export-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:9px;color:var(--muted);cursor:pointer;font-family:inherit;margin-left:auto;}
+.export-btn:hover{border-color:var(--blue);color:var(--blue);}
+</style>
+</head>
+<body>
+
+<!-- HERO — TOTAL PORTFOLIO (dark terminal style) -->
+<div style="background:#0d1117;border-radius:16px;padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;">
+  <!-- rainbow top stripe -->
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#3fb950,#58a6ff,#bc8cff,#f0883e);"></div>
+  <!-- glow orb -->
+  <div style="position:absolute;bottom:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(63,185,80,.08),transparent 65%);pointer-events:none;"></div>
+
+  <!-- top row: tag + refresh -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+      <div class="live-dot"></div>
+      <span style="color:#484f58;font-size:9px;letter-spacing:2px;text-transform:uppercase;">Total Portfolio · All 4 Accounts</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:9px;color:#484f58;font-family:inherit;" id="last-updated"></span>
+      <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">↻</button>
+    </div>
+  </div>
+
+  <!-- big value -->
+  <div style="color:#484f58;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">Total Portfolio Value</div>
+  <div style="font-size:32px;font-weight:800;color:#e6edf3;line-height:1;margin-bottom:3px;" id="tp-total">···</div>
+  <div style="font-size:10px;color:#7d8590;margin-bottom:16px;" id="tp-sub">Fetching live prices…</div>
+
+  <!-- 3 key stats -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;">
+      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Contributed</div>
+      <div style="color:#7d8590;font-size:13px;font-weight:700;">$154,533</div>
+    </div>
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;">
+      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Total Gain</div>
+      <div style="font-size:13px;font-weight:700;color:#3fb950;" id="tp-gain">···</div>
+    </div>
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;">
+      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Multiple</div>
+      <div style="font-size:13px;font-weight:700;color:#26d97f;" id="tp-mult">···</div>
+    </div>
+  </div>
+
+  <!-- rate of return stats -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;">
+      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">TFSA XIRR</div>
+      <div style="font-size:13px;font-weight:700;color:#3fb950;">27.94% / yr</div>
+    </div>
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;">
+      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">RRSP CAGR</div>
+      <div style="font-size:13px;font-weight:700;color:#58a6ff;">~14.2% / yr</div>
+    </div>
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;">
+      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Blended XIRR</div>
+      <div style="font-size:13px;font-weight:700;color:#bc8cff;">~24.0% / yr</div>
+    </div>
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px;">
+      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Spousal RRSP</div>
+      <div style="font-size:13px;font-weight:700;color:#f0883e;">+136.75%</div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICE STRIP -->
+<div class="price-strip">
+  <div class="ptile">
+    <div class="ptile-sym">VEQT.TO ●</div>
+    <div class="ptile-price" id="veqt-p"><span class="blink">···</span></div>
+    <div class="ptile-chg" id="veqt-c"></div>
+  </div>
+  <div class="ptile">
+    <div class="ptile-sym">VFV.TO ●</div>
+    <div class="ptile-price" id="vfv-p"><span class="blink">···</span></div>
+    <div class="ptile-chg" id="vfv-c"></div>
+  </div>
+</div>
+
+<!-- TOTAL LINE CHART -->
+<div class="sec">Portfolio Growth Over Time</div>
+<div class="sec-sub">All 4 accounts · last point updates live</div>
+<div class="chart-wrap"><canvas id="total-line-chart" height="220"></canvas></div>
+
+<!-- BY ACCOUNT BREAKDOWN -->
+<div class="sec">Account Breakdown ●</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px" id="account-tiles"></div>
+
+
+<!-- ACCOUNT SELECTOR -->
+<div class="acct-grid" id="acct-grid"></div>
+
+<!-- DYNAMIC CONTENT -->
+<div id="main-content"></div>
+
+<!-- BOTTOM TABLE -->
+<div class="sec">Full Comparison — All Three Views</div>
+<div class="btbl">
+  <div class="btbl-hdr">
+    <span>Account</span>
+    <span style="text-align:right;color:var(--blue)">Actual XIRR</span>
+    <span style="text-align:right;color:var(--purple)">VEQT</span>
+    <span style="text-align:right;color:var(--orange)">VFV</span>
+  </div>
+  <div id="btbl-rows"></div>
+</div>
+
+<!-- TRANSACTIONS SECTION -->
+<div class="txn-section">
+  <div class="txn-toggle" onclick="toggleTxn()">
+    <div>
+      <div class="txn-toggle-title">📋 Transaction Log</div>
+      <div class="txn-toggle-meta" id="txn-meta">Tap to expand · Enter your trades</div>
+    </div>
+    <span class="txn-chevron" id="txn-chev">▼</span>
+  </div>
+  <div class="txn-body" id="txn-body">
+
+    <!-- ADD FORM -->
+    <div class="txn-form">
+      <div class="txn-form-title">Add Transaction</div>
+      <div class="form-grid">
+        <div>
+          <div class="field-lbl">Date</div>
+          <input class="field-inp" type="date" id="f-date">
+        </div>
+        <div>
+          <div class="field-lbl">Account</div>
+          <select class="field-inp" id="f-account">
+            <option value="Amit TFSA">Amit TFSA</option>
+            <option value="Amit RRSP">Amit RRSP</option>
+            <option value="Trisha TFSA">Trisha TFSA</option>
+            <option value="Spousal RRSP">Spousal RRSP</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div>
+          <div class="field-lbl">Type</div>
+          <select class="field-inp" id="f-type">
+            <option value="buy">BUY</option>
+            <option value="sell">SELL</option>
+            <option value="div">DIVIDEND</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-lbl">Symbol</div>
+          <select class="field-inp" id="f-symbol">
+            <option value="VEQT.TO">VEQT.TO</option>
+            <option value="VFV.TO">VFV.TO</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid-3">
+        <div>
+          <div class="field-lbl">Shares</div>
+          <input class="field-inp" type="number" id="f-shares" placeholder="0.0000" step="0.0001" min="0">
+        </div>
+        <div>
+          <div class="field-lbl">Price / Share</div>
+          <input class="field-inp" type="number" id="f-price" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div>
+          <div class="field-lbl">Total (auto)</div>
+          <input class="field-inp" type="number" id="f-total" placeholder="0.00" step="0.01" readonly style="opacity:.6;">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div class="field-lbl">Note (optional)</div>
+        <input class="field-inp" type="text" id="f-note" placeholder="e.g. Bear market buy, dividend reinvest…" maxlength="80">
+      </div>
+      <button class="add-btn" onclick="addTxn()">+ Add Transaction</button>
+    </div>
+
+    <!-- FILTERS + LIST -->
+    <div class="txn-list">
+      <div class="txn-filters">
+        <button class="txn-filter active" onclick="setFilter('all',this)">All</button>
+        <button class="txn-filter" onclick="setFilter('Amit TFSA',this)">Amit TFSA</button>
+        <button class="txn-filter" onclick="setFilter('Amit RRSP',this)">Amit RRSP</button>
+        <button class="txn-filter" onclick="setFilter('Trisha TFSA',this)">Trisha TFSA</button>
+        <button class="txn-filter" onclick="setFilter('Spousal RRSP',this)">Spousal</button>
+        <button class="txn-filter" onclick="setFilter('buy',this)">BUY</button>
+        <button class="txn-filter" onclick="setFilter('sell',this)">SELL</button>
+      </div>
+      <div id="txn-list-wrap"></div>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="txn-summary" id="txn-summary">
+      <div class="txn-sum-item">Transactions:<span id="ts-count">0</span></div>
+      <div class="txn-sum-item">Total Invested:<span id="ts-invested">$0</span></div>
+      <div class="txn-sum-item">Total Proceeds:<span id="ts-proceeds">$0</span></div>
+      <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="fn">
+  XIRR on actual dated cash flows · VEQT/VFV counterfactuals use same dates + same amounts + actual share counts<br>
+  Benchmark shares: Amit VEQT 3,284.35 · Amit VFV 564.68 · Trisha VEQT 1,187.00 · Trisha VFV 395.23<br>
+  Not financial advice · Prices via Yahoo Finance · Auto-refresh every 60s
+</div>
+
+<script>
+// ── SHARE COUNTS ─────────────────────────────────────────────
+var S = {
+  amitTFSA_VEQT:   2324.24364,
+  amitTFSA_VFV:    334.37632,
+  amitTFSA_CASH:   38.15,
+  trishaTFSA_VFV:  385.16953,
+  trishaTFSA_CASH: 41.32,
+  amitRRSP_VEQT:   1443.71,
+  amitRRSP_CASH:   0.09,
+  spousal_VEQT:    354.5556
+};
+// Benchmark shares (same $ same dates → pure ETF)
+var B = {
+  amitVEQT:    3284.3483,
+  amitVFV:     564.6798,
+  trishaVEQT:  1187.0005,
+  trishaVFV:   395.2304,
+  combVEQT:    3018.1818,
+  combVFV:     959.9102   // 564.6798 + 395.2304
+};
+var CONTRIB = { amit:60905, trisha:41499, comb:102404, rrsp:43521, spousal:8583, total:154533 };
+
+// ── STATIC ACCOUNT DATA ───────────────────────────────────────
+var ACCOUNTS = [
+  {
+    id:'comb', label:'All TFSAs', sub:'Amit + Trisha · all brokers',
+    color:'var(--blue)', colorHex:'#2563eb', dataColor:'blue',
+    period:'Apr 2018 → now', years:8,
+    contrib: CONTRIB.comb,
+    xirr:27.9, veqtXirr:15.96, vfvXirr:15.5,
+    verdict:'✅ Beats both', verdictColor:'var(--green)',
+    summary:'The combined TFSA crushed both VEQT and VFV by over $85k. Regular DCA into VEQT through 2021-2023 plus large lump sums at 2022 lows are the main drivers. ETF selection had almost no impact — contribution timing was everything.',
+    growthData:[
+      {p:"2019",a:100, v:100, f:100},
+      {p:"2020",a:100, v:100, f:100},
+      {p:"2021",a:283, v:223, f:194},
+      {p:"2022",a:404, v:367, f:331},
+      {p:"2023",a:1127,v:890, f:921},
+      {p:"2024",a:1640,v:1194,f:1294},
+      {p:"Now",  a:0,  v:0,  f:0}
+    ]
+  },
+  {
+    id:'amit', label:'Amit TFSA', sub:'TD (82BJR7-J) + Qtrade',
+    color:'var(--green)', colorHex:'#16a34a', dataColor:'green',
+    period:'Apr 2018 → now', years:8,
+    contrib: CONTRIB.amit,
+    xirr:27.94, veqtXirr:17.5, vfvXirr:16.8,
+    verdict:'🏆 Massive outperform', verdictColor:'var(--green)',
+    summary:"Amit beat a pure VEQT strategy by ~$3,133 and beat VFV by ~$93,212. The secret was bi-weekly DCA into VEQT through 2021–2023 when prices were rising, plus large lump sums at 2022 lows. The active contribution strategy outperformed passively buying and holding either benchmark.",
+    growthData:[
+      {p:"Dec'21",a:100,v:100,f:100},
+      {p:"Dec'22",a:177,v:190,f:174},
+      {p:"Dec'23",a:347,v:517,f:516},
+      {p:"Dec'24",a:431,v:707,f:682},
+      {p:"Now",   a:0,  v:0,  f:0}
+    ]
+  },
+  {
+    id:'trisha', label:'Trisha TFSA', sub:'TD (82BJR6-J) + Qtrade',
+    color:'var(--orange)', colorHex:'#ea6c00', dataColor:'orange',
+    period:'Jul 2023 → now', years:2.8,
+    contrib: CONTRIB.trisha,
+    xirr:18.7, veqtXirr:20.9, vfvXirr:23.2,
+    verdict:'⚠️ Slight underperform', verdictColor:'var(--yellow)',
+    summary:"Trisha trails VEQT slightly over her 2.8yr window. VFV actually won over this specific period — but VEQT has been outpacing VFV since late 2024 and that trend may continue. Switching VFV → VEQT now would capture that going forward at zero tax cost (TFSA).",
+    growthData:[
+      {p:"Jul'23",a:100,v:100,f:100},
+      {p:"Dec'23",a:105,v:105,f:119},
+      {p:"Dec'24",a:141,v:132,f:145},
+      {p:"Now",   a:0,  v:0,  f:0}
+    ]
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────
+var curSel = 'comb';
+var VP = 57.31, FP = 173.81;  // fallback prices
+
+// ── HELPERS ──────────────────────────────────────────────────
+function m$(n,d){ d=d||0; return '$'+n.toLocaleString('en-CA',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function pct(n){ return (n>=0?'+':'')+n.toFixed(1)+'%'; }
+function el(id){ return document.getElementById(id); }
+function set(id,val,col){ var e=el(id); if(!e)return; e.textContent=val; if(col)e.style.color=col; }
+function fmtK(v){ return '$'+Math.round(v/1000)+'k'; }
+
+// ── LIVE ACCOUNT CALCULATIONS ─────────────────────────────────
+function calcAccounts(V,F){
+  var amitA   = S.amitTFSA_VEQT*V + S.amitTFSA_VFV*F + S.amitTFSA_CASH;
+  var trishaA = S.trishaTFSA_VFV*F + S.trishaTFSA_CASH;
+  var combA   = amitA + trishaA;
+  var rrsp    = S.amitRRSP_VEQT*V + S.amitRRSP_CASH;
+  var spousal = S.spousal_VEQT*V;
+  var total   = combA + rrsp + spousal;
+
+  var amitVEQT   = B.amitVEQT*V;
+  var amitVFV    = B.amitVFV*F;
+  var trishaVEQT = B.trishaVEQT*V;
+  var trishaVFV  = B.trishaVFV*F;
+  var combVEQT   = B.combVEQT*V;
+  var combVFV    = B.combVFV*F;
+
+  return {
+    amitA:amitA, trishaA:trishaA, combA:combA,
+    rrsp:rrsp, spousal:spousal, total:total,
+    amitVEQT:amitVEQT, amitVFV:amitVFV,
+    trishaVEQT:trishaVEQT, trishaVFV:trishaVFV,
+    combVEQT:combVEQT, combVFV:combVFV
+  };
+}
+
+// ── BUILD ACCOUNT SELECTOR ────────────────────────────────────
+function buildSelector(){
+  var grid = el('acct-grid');
+  grid.innerHTML = '';
+  ACCOUNTS.forEach(function(a){
+    var btn = document.createElement('button');
+    btn.className = 'acct-btn' + (a.id===curSel?' active':'');
+    btn.setAttribute('data-color', a.dataColor);
+    btn.setAttribute('data-id', a.id);
+    btn.onclick = function(){ curSel=a.id; buildSelector(); buildMain(); };
+    btn.innerHTML =
+      '<div class="ab-label" style="color:'+a.color+'">'+a.label+'</div>'+
+      '<div class="ab-period">'+a.years+'yr period</div>'+
+      '<div class="ab-xirr up">+'+a.xirr.toFixed(1)+'%</div>'+
+      '<div class="ab-xirr-lbl">actual XIRR/yr</div>'+
+      '<div class="ab-verdict" style="color:'+a.verdictColor+'">'+a.verdict+'</div>';
+    grid.appendChild(btn);
+  });
+}
+
+// ── CHART INSTANCES ───────────────────────────────────────────
+var barChart=null, xirrChart=null, growthChart=null, totalLineChart=null;
+Chart.defaults.plugins.legend.display = false;
+var GRID='#21262d';
+var TT={backgroundColor:'#161b22',borderColor:'#21262d',borderWidth:1,titleColor:'#e6edf3',bodyColor:'#7d8590',padding:10,cornerRadius:8,boxPadding:3};
+
+function buildBarChart(canvasId, data){
+  var ctx = el(canvasId); if(!ctx)return null;
+  var ex = Chart.getChart(ctx); if(ex)ex.destroy();
+  return new Chart(ctx.getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:['Actual','VEQT only','VFV only'],
+      datasets:[{
+        data:[data.actual, data.veqt, data.vfv],
+        backgroundColor:['#3fb950','#bc8cff','#f0883e'],
+        borderRadius:4, borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{...TT, callbacks:{label:function(c){return ' '+m$(c.parsed.y);}}}
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:'#7d8590',font:{size:10,family:'IBM Plex Mono'}}},
+        y:{grid:{color:GRID},ticks:{color:'#7d8590',font:{size:9},callback:function(v){return fmtK(v);}}}
+      }
+    }
+  });
+}
+
+function buildXirrChart(canvasId, data){
+  var ctx = el(canvasId); if(!ctx)return null;
+  var ex = Chart.getChart(ctx); if(ex)ex.destroy();
+  return new Chart(ctx.getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:['Actual','VEQT only','VFV only'],
+      datasets:[{
+        data:[data.xirr, data.veqtXirr, data.vfvXirr],
+        backgroundColor:['#3fb950','#bc8cff','#f0883e'],
+        borderRadius:4, borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{...TT, callbacks:{label:function(c){return ' '+c.parsed.y.toFixed(1)+'%';}}}
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:'#7d8590',font:{size:10,family:'IBM Plex Mono'}}},
+        y:{
+          grid:{color:GRID},
+          ticks:{color:'#7d8590',font:{size:9},callback:function(v){return v+'%';}},
+          min:0, max:35
+        }
+      }
+    }
+  });
+}
+
+function buildGrowthChart(canvasId, growthData, accentColor){
+  var ctx = el(canvasId); if(!ctx) return null;
+  var ex = Chart.getChart(ctx); if(ex) ex.destroy();
+  return new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: growthData.map(function(d){ return d.p; }),
+      datasets: [
+        {
+          label: 'Actual',
+          data: growthData.map(function(d){ return d.a; }),
+          borderColor: '#3fb950',
+          backgroundColor: 'rgba(63,185,80,.08)',
+          borderWidth: 3,
+          fill: true,
+          pointRadius: 5,
+          pointBackgroundColor: '#3fb950',
+          pointBorderColor: '#0d1117',
+          pointBorderWidth: 2,
+          tension: .4,
+          order: 1
+        },
+        {
+          label: 'VEQT only',
+          data: growthData.map(function(d){ return d.v; }),
+          borderColor: '#bc8cff',
+          backgroundColor: 'rgba(188,140,255,.05)',
+          borderWidth: 2,
+          borderDash: [6, 3],
+          fill: false,
+          pointRadius: 4,
+          pointBackgroundColor: '#bc8cff',
+          pointBorderColor: '#0d1117',
+          pointBorderWidth: 2,
+          tension: .4,
+          order: 2
+        },
+        {
+          label: 'VFV only',
+          data: growthData.map(function(d){ return d.f; }),
+          borderColor: '#f0883e',
+          backgroundColor: 'rgba(240,136,62,.05)',
+          borderWidth: 2,
+          borderDash: [2, 4],
+          fill: false,
+          pointRadius: 4,
+          pointBackgroundColor: '#f0883e',
+          pointBorderColor: '#0d1117',
+          pointBorderWidth: 2,
+          tension: .4,
+          order: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {mode: 'index', intersect: false},
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: '#7d8590',
+            font: {size: 9, family: 'IBM Plex Mono'},
+            boxWidth: 10,
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          ...TT,
+          callbacks: {
+            label: function(c) {
+              return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(0);
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {color: GRID},
+          ticks: {color: '#7d8590', font: {size: 9}}
+        },
+        y: {
+          grid: {color: GRID},
+          ticks: {
+            color: '#7d8590',
+            font: {size: 9},
+            callback: function(v){ return v; }
+          }
+        }
+      }
+    }
+  });
+}
+
+
+function buildMain(){
+  var c = calcAccounts(VP,FP);
+  var a = ACCOUNTS.find(function(x){return x.id===curSel;});
+
+  var actual, veqt, vfv;
+  if(a.id==='comb'){   actual=c.combA;   veqt=c.combVEQT;   vfv=c.combVFV;   }
+  else if(a.id==='amit'){actual=c.amitA;  veqt=c.amitVEQT;   vfv=c.amitVFV;   }
+  else{                  actual=c.trishaA;veqt=c.trishaVEQT; vfv=c.trishaVFV; }
+
+  var vsVEQT = actual-veqt, vsVFV = actual-vfv;
+  var gain   = actual-a.contrib;
+
+  // Update growth data last point — indexed to 100 at start
+  var gd = JSON.parse(JSON.stringify(a.growthData));
+  // Find the base value (first data point actual value in dollars)
+  var baseActual, baseVEQT, baseVFV;
+  if (a.id === 'amit') {
+    // Base = Dec 2021 actual values
+    baseActual = 29670; baseVEQT = 18465; baseVFV = 10858;
+    gd[gd.length-1] = {
+      p:'Now',
+      a: Math.round(actual / baseActual * 100),
+      v: Math.round(veqt  / baseActual * 100),
+      f: Math.round(vfv   / baseActual * 100)
+    };
+  } else if (a.id === 'trisha') {
+    baseActual = 41499;
+    gd[gd.length-1] = {
+      p:'Now',
+      a: Math.round(actual / baseActual * 100),
+      v: Math.round(veqt  / baseActual * 100),
+      f: Math.round(vfv   / baseActual * 100)
+    };
+  } else {
+    // Combined — use actual/veqt/vfv already set at top of buildMain
+    baseActual = 10410;
+    gd[gd.length-1] = {
+      p:'Now',
+      a: Math.round(actual / baseActual * 100),
+      v: Math.round(veqt   / baseActual * 100),
+      f: Math.round(vfv    / baseActual * 100)
+    };
+  }
+
+  var vsVeqtStr = (vsVEQT>=0?'+':'')+m$(vsVEQT);
+  var vsVfvStr  = (vsVFV>=0?'+':'')+m$(vsVFV);
+  var vsVeqtPp  = (a.xirr-a.veqtXirr>=0?'+':'')+(a.xirr-a.veqtXirr).toFixed(1)+'pp';
+  var vsVfvPp   = (a.xirr-a.vfvXirr>=0?'+':'')+(a.xirr-a.vfvXirr).toFixed(1)+'pp';
+  var posVeqt   = vsVEQT>=0;
+  var posVfv    = vsVFV>=0;
+
+  el('main-content').innerHTML =
+    // ── VALUE BARS ──
+    '<div class="sec">Portfolio Value — Actual vs If 100% VEQT vs If 100% VFV</div>'+
+    '<div class="sec-sub">Same '+m$(a.contrib)+' invested · same dates · only the ETF changes</div>'+
+    '<div class="chart-wrap"><canvas id="bar-chart" height="190"></canvas></div>'+
+
+    // ── DIFF CALLOUTS ──
+    '<div class="diff-grid">'+
+      '<div class="diff-box" style="border-left:3px solid '+(posVeqt?'var(--teal)':'var(--red)')+'">'+
+        '<div class="diff-lbl">Actual vs VEQT-only</div>'+
+        '<div class="diff-val" style="color:'+(posVeqt?'var(--teal)':'var(--red)')+'">'+vsVeqtStr+'</div>'+
+        '<div class="diff-pp" style="color:'+(posVeqt?'var(--teal)':'var(--red)')+'">'+vsVeqtPp+' per year</div>'+
+      '</div>'+
+      '<div class="diff-box" style="border-left:3px solid '+(posVfv?'var(--teal)':'var(--red)')+'">'+
+        '<div class="diff-lbl">Actual vs VFV-only</div>'+
+        '<div class="diff-val" style="color:'+(posVfv?'var(--teal)':'var(--red)')+'">'+vsVfvStr+'</div>'+
+        '<div class="diff-pp" style="color:'+(posVfv?'var(--teal)':'var(--red)')+'">'+vsVfvPp+' per year</div>'+
+      '</div>'+
+    '</div>'+
+
+    // ── XIRR BARS ──
+    '<div class="sec">XIRR Comparison — %/yr</div>'+
+    '<div class="chart-wrap"><canvas id="xirr-chart" height="160"></canvas></div>'+
+
+    // ── GROWTH LINE ──
+    (a.id!=='comb'?
+      '<div class="sec">Indexed Growth (start=100) — Actual vs VEQT vs VFV</div>'+
+      '<div class="chart-wrap"><canvas id="growth-chart" height="180"></canvas></div>'
+    :'')+
+
+    // ── SUMMARY CARD ──
+    '<div class="summary-card" style="border:2px solid '+a.verdictColor+'44">'+
+      '<div class="summary-header">'+
+        '<div class="summary-name" style="color:'+a.color+'">'+a.label+'</div>'+
+        '<div class="verdict-badge" style="color:'+a.verdictColor+';background:'+a.verdictColor+'22;border:1px solid '+a.verdictColor+'">'+a.verdict+'</div>'+
+      '</div>'+
+      '<div class="score-grid">'+
+        '<div class="score-box"><div class="score-lbl">Invested</div><div class="score-val" style="color:var(--muted)">'+m$(a.contrib)+'</div></div>'+
+        '<div class="score-box"><div class="score-lbl">Actual Value</div><div class="score-val" style="color:'+a.color+'">'+m$(Math.round(actual))+'</div></div>'+
+        '<div class="score-box"><div class="score-lbl">Gain</div><div class="score-val up">+'+(((actual/a.contrib)-1)*100).toFixed(1)+'%</div></div>'+
+        '<div class="score-box"><div class="score-lbl">Actual XIRR</div><div class="score-val up">+'+a.xirr.toFixed(1)+'% /yr</div></div>'+
+        '<div class="score-box"><div class="score-lbl">VEQT XIRR</div><div class="score-val" style="color:var(--purple)">+'+a.veqtXirr.toFixed(1)+'% /yr</div></div>'+
+        '<div class="score-box"><div class="score-lbl">VFV XIRR</div><div class="score-val" style="color:var(--orange)">+'+a.vfvXirr.toFixed(1)+'% /yr</div></div>'+
+      '</div>'+
+      '<div class="summary-text">'+a.summary+'</div>'+
+    '</div>'+
+
+    // ── INSIGHT ──
+    '<div class="insight">'+
+      '<div class="insight-title">💡 The Key Insight</div>'+
+      '<div class="insight-text">'+
+        '<b style="color:var(--text)">Amit beat VEQT by ~$3,133</b> and beat VFV by <b style="color:var(--text)">~$93,212</b> — not by picking better stocks, but by making <b style="color:var(--green)">regular contributions during a bull run</b>. DCA into VEQT through 2021-2023 while prices rose meant each new purchase compounded more.<br><br>'+
+        '<b style="color:var(--text)">Trisha trailed VEQT by ~$1,039</b> over 2.8 years. VFV actually beat VEQT over her full window (Jul 2023→now) — but <b style="color:var(--orange)">VEQT has been outpacing VFV since late 2024</b>. Switching VFV → VEQT now costs nothing (TFSA, no capital gains).'+
+      '</div>'+
+    '</div>';
+
+  // Build charts
+  buildBarChart('bar-chart', {actual:actual, veqt:veqt, vfv:vfv, color:a.colorHex});
+  buildXirrChart('xirr-chart', a);
+  if(a.id!=='comb') buildGrowthChart('growth-chart', gd, a.colorHex);
+}
+
+// ── TOTAL PORTFOLIO CHART ─────────────────────────────────────
+function buildTotalLine(){
+  var ctx = el('total-line-chart'); if(!ctx)return;
+  var ex = Chart.getChart(ctx); if(ex)ex.destroy();
+  var c = calcAccounts(VP,FP);
+  var portData = [9253,9253,9253,52400,93300,186400,258500,Math.round(c.total)];
+  var contribData = [9017,9017,9017,68796,85271,133333,140333,154533];
+  totalLineChart = new Chart(ctx.getContext('2d'),{
+    type:'line',
+    data:{
+      labels:['2018','2019','2020','2021','2022','2023','2024','Now'],
+      datasets:[
+        {
+          label:'Portfolio Value',
+          data:portData,
+          borderColor:'#2563eb',
+          backgroundColor:'rgba(37,99,235,.08)',
+          borderWidth:3, fill:true,
+          pointRadius:5, pointBackgroundColor:'#2563eb',
+          pointBorderColor:'#0d1117', pointBorderWidth:2, tension:.4, order:1
+        },
+        {
+          label:'Contributed',
+          data:contribData,
+          borderColor:'#e3b341',
+          backgroundColor:'transparent',
+          borderWidth:2, borderDash:[5,4], fill:false,
+          pointRadius:3, pointBackgroundColor:'#e3b341',
+          pointBorderColor:'#0d1117', pointBorderWidth:2, tension:.3, order:2
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:true,labels:{color:'#7d8590',font:{size:9,family:'IBM Plex Mono'},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{
+          ...TT,
+          callbacks:{
+            label:function(c){ return ' '+c.dataset.label+': '+m$(c.parsed.y); },
+            afterLabel:function(c){
+              if(c.datasetIndex===0){
+                var g=c.parsed.y-contribData[c.dataIndex];
+                return ' Gain: '+(g>=0?'+':'')+m$(g);
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:'#7d8590',font:{size:9}}},
+        y:{grid:{color:GRID},ticks:{color:'#7d8590',font:{size:9},callback:function(v){return fmtK(v);}}}
+      }
+    }
+  });
+}
+
+// ── ACCOUNT TILES ─────────────────────────────────────────────
+function buildAccountTiles(){
+  var c = calcAccounts(VP,FP);
+  var tiles = [
+    {name:"Amit TFSA",  val:c.amitA,   contrib:CONTRIB.amit,   color:'var(--green)',  xirr:'27.94%'},
+    {name:"Amit RRSP",  val:c.rrsp,    contrib:CONTRIB.rrsp,   color:'var(--blue)',   xirr:'~14.2%'},
+    {name:"Trisha TFSA",val:c.trishaA, contrib:CONTRIB.trisha, color:'var(--orange)', xirr:'~18.7%'},
+    {name:"Spousal",    val:c.spousal, contrib:CONTRIB.spousal, color:'var(--purple)', xirr:'+136.75%'}
+  ];
+  var wrap = el('account-tiles');
+  wrap.innerHTML = tiles.map(function(t){
+    var g=t.val-t.contrib, gp=((t.val/t.contrib-1)*100).toFixed(1);
+    return '<div class="th-stat">'+
+      '<div class="th-stat-lbl" style="color:'+t.color+'">'+t.name+'</div>'+
+      '<div class="th-stat-val">'+m$(Math.round(t.val))+'</div>'+
+      '<div style="font-size:9px;color:'+(g>=0?'var(--green)':'var(--red)')+'">+'+(g>=0?m$(Math.round(g)):'-')+'  (+'+gp+'%)</div>'+
+      '<div style="font-size:8px;color:var(--dim);margin-top:2px">XIRR: '+t.xirr+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── BOTTOM TABLE ──────────────────────────────────────────────
+function buildTable(){
+  var rows = el('btbl-rows');
+  rows.innerHTML = ACCOUNTS.map(function(a){
+    return '<div class="btbl-row '+(curSel===a.id?'active':'')+ '" onclick="curSel=\''+a.id+'\';buildSelector();buildMain();">'+
+      '<div><div class="btbl-name" style="color:'+a.color+'">'+a.label+'</div><div class="btbl-period">'+a.period+'</div></div>'+
+      '<div class="btbl-val up">+'+a.xirr.toFixed(1)+'%</div>'+
+      '<div class="btbl-val" style="color:var(--purple)">+'+a.veqtXirr.toFixed(1)+'%</div>'+
+      '<div class="btbl-val" style="color:var(--orange)">+'+a.vfvXirr.toFixed(1)+'%</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── UPDATE ALL LIVE VALUES ────────────────────────────────────
+function updateLiveValues(){
+  var c = calcAccounts(VP,FP);
+  var gain = c.total - CONTRIB.total;
+  set('tp-total', m$(Math.round(c.total)));
+  set('tp-gain',  (gain>=0?'+':'')+m$(Math.round(gain))+' ('+(((c.total/CONTRIB.total)-1)*100).toFixed(1)+'%)', gain>=0?'var(--green)':'var(--red)');
+  set('tp-mult',  (c.total/CONTRIB.total).toFixed(2)+'\u00d7');
+  set('tp-sub',   'Live · Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+  buildTotalLine();
+  buildAccountTiles();
+  buildMain();
+  buildTable();
+}
+
+// ── PRICE FETCH ───────────────────────────────────────────────
+function tryFetch(url){ return fetch(url,{cache:'no-store'}).then(function(r){return r.json();}); }
+function fetchPrice(sym){
+  var p = Promise.reject();
+  [
+    function(){return tryFetch('https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=2d').then(function(d){var m=d.chart.result[0].meta;return{price:m.regularMarketPrice,prev:m.chartPreviousClose};});},
+    function(){return tryFetch('https://query2.finance.yahoo.com/v7/finance/quote?symbols='+sym).then(function(d){var q=d.quoteResponse.result[0];return{price:q.regularMarketPrice,prev:q.regularMarketPreviousClose};});}
+  ].forEach(function(fn){ p=p.catch(function(){return fn();}); });
+  return p.catch(function(){return null;});
+}
+
+async function fetchAll(){
+  var btn=el('refresh-btn'); if(btn){btn.textContent='⟳';btn.disabled=true;}
+  var res=await Promise.all([fetchPrice('VEQT.TO'),fetchPrice('VFV.TO')]);
+  var v=res[0],f=res[1];
+
+  function applyTicker(data,pId,cId){
+    if(!data){set(pId,'N/A');set(cId,'');return;}
+    var ch=data.price-data.prev,up=ch>=0;
+    set(pId,m$(data.price,2),up?'var(--green)':'var(--red)');
+    set(cId,(up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+((ch/data.prev)*100).toFixed(2)+'%)',up?'var(--green)':'var(--red)');
+  }
+  applyTicker(v,'veqt-p','veqt-c');
+  applyTicker(f,'vfv-p','vfv-c');
+
+  if(v) VP=v.price;
+  if(f) FP=f.price;
+
+  set('last-updated','Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+  updateLiveValues();
+  if(btn){btn.textContent='↻ Refresh';btn.disabled=false;}
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+buildSelector();
+buildMain();
+buildTotalLine();
+buildAccountTiles();
+buildTable();
+fetchAll();
+setInterval(fetchAll,60000);
+
+// ══════════════════════════════════════════════
+// TRANSACTIONS
+// ══════════════════════════════════════════════
+var TXN_KEY = 'portfolio_txns_v1';
+var txnFilter = 'all';
+
+function loadTxns() {
+  try { return JSON.parse(localStorage.getItem(TXN_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveTxns(arr) {
+  localStorage.setItem(TXN_KEY, JSON.stringify(arr));
+}
+
+// Auto-calc total when shares or price changes
+el('f-shares').addEventListener('input', calcTotal);
+el('f-price').addEventListener('input', calcTotal);
+function calcTotal() {
+  var s = parseFloat(el('f-shares').value) || 0;
+  var p = parseFloat(el('f-price').value) || 0;
+  el('f-total').value = s && p ? (s*p).toFixed(2) : '';
+}
+
+function addTxn() {
+  var date    = el('f-date').value;
+  var account = el('f-account').value;
+  var type    = el('f-type').value;
+  var symbol  = el('f-symbol').value;
+  var shares  = parseFloat(el('f-shares').value);
+  var price   = parseFloat(el('f-price').value);
+  var note    = el('f-note').value.trim();
+
+  if (!date)            { alert('Please enter a date.'); return; }
+  if (!shares || shares <= 0) { alert('Please enter shares.'); return; }
+  if (!price  || price  <= 0) { alert('Please enter price per share.'); return; }
+
+  var txn = {
+    id: Date.now(),
+    date: date,
+    account: account,
+    type: type,
+    symbol: symbol,
+    shares: shares,
+    price: price,
+    total: parseFloat((shares * price).toFixed(2)),
+    note: note
+  };
+
+  var arr = loadTxns();
+  arr.push(txn);
+  arr.sort(function(a,b){ return b.date.localeCompare(a.date); });
+  saveTxns(arr);
+
+  // Reset form
+  el('f-shares').value = '';
+  el('f-price').value  = '';
+  el('f-total').value  = '';
+  el('f-note').value   = '';
+
+  renderTxns();
+}
+
+function deleteTxn(id) {
+  var arr = loadTxns().filter(function(t){ return t.id !== id; });
+  saveTxns(arr);
+  renderTxns();
+}
+
+function setFilter(f, btn) {
+  txnFilter = f;
+  document.querySelectorAll('.txn-filter').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderTxns();
+}
+
+function m$txn(n) {
+  return '$' + Math.abs(n).toLocaleString('en-CA', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function renderTxns() {
+  var all = loadTxns();
+  var filtered = all.filter(function(t) {
+    if (txnFilter === 'all') return true;
+    if (txnFilter === 'buy' || txnFilter === 'sell') return t.type === txnFilter;
+    return t.account === txnFilter;
+  });
+
+  var wrap = el('txn-list-wrap');
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="txn-empty">No transactions yet — add your first trade above</div>';
+  } else {
+    wrap.innerHTML = filtered.map(function(t) {
+      var typeClass = t.type === 'buy' ? 'buy' : t.type === 'sell' ? 'sell' : 'div';
+      var typeLabel = t.type === 'buy' ? 'BUY' : t.type === 'sell' ? 'SELL' : 'DIV';
+      var amtColor  = t.type === 'sell' ? 'var(--red)' : t.type === 'div' ? 'var(--yellow)' : 'var(--green)';
+      var amtSign   = t.type === 'sell' ? '-' : '+';
+      return '<div class="txn-row">' +
+        '<div class="txn-date">' + t.date + '</div>' +
+        '<span class="txn-type ' + typeClass + '">' + typeLabel + '</span>' +
+        '<div>' +
+          '<div class="txn-sym">' + t.symbol + ' <span style="color:var(--dim);font-size:9px;">' + t.account + '</span></div>' +
+          '<div class="txn-detail">' + t.shares.toFixed(4) + ' sh @ $' + t.price.toFixed(2) + (t.note?' · '+t.note:'') + '</div>' +
+        '</div>' +
+        '<div class="txn-amount" style="color:'+amtColor+'">' + amtSign + m$txn(t.total) + '</div>' +
+        '<button class="txn-del" onclick="deleteTxn('+t.id+')" title="Delete">✕</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Summary
+  var invested  = all.filter(function(t){ return t.type==='buy'; }).reduce(function(s,t){ return s+t.total; }, 0);
+  var proceeds  = all.filter(function(t){ return t.type==='sell'; }).reduce(function(s,t){ return s+t.total; }, 0);
+  set('ts-count',    all.length);
+  set('ts-invested', m$txn(invested));
+  set('ts-proceeds', m$txn(proceeds));
+  set('txn-meta',    all.length + ' transaction' + (all.length!==1?'s':'') + ' · tap to ' + (el('txn-body').classList.contains('open')?'collapse':'expand'));
+}
+
+function toggleTxn() {
+  var body = el('txn-body');
+  var chev = el('txn-chev');
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+  renderTxns();
+}
+
+function exportCSV() {
+  var arr = loadTxns();
+  if (!arr.length) { alert('No transactions to export.'); return; }
+  var rows = ['Date,Account,Type,Symbol,Shares,Price,Total,Note'];
+  arr.forEach(function(t) {
+    rows.push([t.date, t.account, t.type.toUpperCase(), t.symbol, t.shares, t.price, t.total, '"'+(t.note||'')+'"'].join(','));
+  });
+  var blob = new Blob([rows.join('\n')], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio_transactions.csv';
+  a.click();
+}
+
+// Set default date to today
+(function(){
+  var today = new Date().toISOString().split('T')[0];
+  el('f-date').value = today;
+  renderTxns();
+})();
+
+</script>
+</body>
+</html>
