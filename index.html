@@ -884,7 +884,6 @@ var ACCOUNTS = [
 var curSel = 'comb';
 var VP = 57.31, FP = 173.81;  // live prices
 var VP_PREV = 57.31, FP_PREV = 173.81; // previous close
-var VP_PREV = 57.31, FP_PREV = 173.81; // previous close prices
 
 // ── HELPERS ──────────────────────────────────────────────────
 function m$(n,d){ d=d||0; return '$'+n.toLocaleString('en-CA',{minimumFractionDigits:d,maximumFractionDigits:d}); }
@@ -1325,7 +1324,9 @@ function updateLiveValues(){
     dEl.style.color = dailyPL>=0?'#3fb950':'#f85149';
   }
   if(dSub){
-    dSub.textContent = (dailyPct>=0?'+':'')+dailyPct.toFixed(2)+'%';
+    var veqtChg = VP - VP_PREV;
+    var vfvChg  = FP - FP_PREV;
+    dSub.textContent = (dailyPct>=0?'+':'')+dailyPct.toFixed(2)+'% · VEQT '+(veqtChg>=0?'+':'')+veqtChg.toFixed(2)+' VFV '+(vfvChg>=0?'+':'')+vfvChg.toFixed(2);
   }
 
   buildTotalLine();
@@ -1337,464 +1338,56 @@ function updateLiveValues(){
 // ── PRICE FETCH ───────────────────────────────────────────────
 function tryFetch(url){ return fetch(url,{cache:'no-store'}).then(function(r){return r.json();}); }
 function fetchPrice(sym){
-  // Try multiple sources — direct Yahoo often blocked on GitHub Pages (CORS)
-  var encoded = encodeURIComponent('https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=2d');
+  var ts = '&_=' + Date.now(); // cache-buster
+  var v7url  = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + sym + ts;
+  var v8url  = 'https://query1.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=5d' + ts;
+  var v8url2 = 'https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=5d' + ts;
+
+  function parseV7(d){
+    var q = d.quoteResponse.result[0];
+    return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose };
+  }
+  function parseV8(d){
+    var m = d.chart.result[0].meta;
+    return { price: m.regularMarketPrice, prev: m.chartPreviousClose };
+  }
+
   var apis = [
-    // 1. allorigins CORS proxy (most reliable for GitHub Pages)
+    // 1. Direct Yahoo v7 — works in many browsers/regions
+    function(){ return tryFetch(v7url).then(parseV7); },
+    // 2. Direct Yahoo v8
+    function(){ return tryFetch(v8url).then(parseV8); },
+    // 3. corsproxy + v7
     function(){
-      return tryFetch('https://api.allorigins.win/get?url='+encoded)
-        .then(function(d){
-          var inner = JSON.parse(d.contents);
-          var m = inner.chart.result[0].meta;
-          return {price:m.regularMarketPrice, prev:m.chartPreviousClose};
-        });
+      return tryFetch('https://corsproxy.io/?' + encodeURIComponent(v7url))
+        .then(parseV7);
     },
-    // 2. corsproxy.io
+    // 4. corsproxy + v8
     function(){
-      return tryFetch('https://corsproxy.io/?'+encoded)
-        .then(function(d){
-          var m = d.chart.result[0].meta;
-          return {price:m.regularMarketPrice, prev:m.chartPreviousClose};
-        });
+      return tryFetch('https://corsproxy.io/?' + encodeURIComponent(v8url2))
+        .then(parseV8);
     },
-    // 3. Direct Yahoo v8 (works in some browsers/regions)
+    // 5. allorigins + v7 (may be cached but last resort)
     function(){
-      return tryFetch('https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=2d')
-        .then(function(d){
-          var m = d.chart.result[0].meta;
-          return {price:m.regularMarketPrice, prev:m.chartPreviousClose};
-        });
+      return tryFetch('https://api.allorigins.win/get?url=' + encodeURIComponent(v7url))
+        .then(function(d){ return parseV7(JSON.parse(d.contents)); });
     },
-    // 4. Direct Yahoo v7
+    // 6. allorigins + v8
     function(){
-      return tryFetch('https://query2.finance.yahoo.com/v7/finance/quote?symbols='+sym)
-        .then(function(d){
-          var q = d.quoteResponse.result[0];
-          return {price:q.regularMarketPrice, prev:q.regularMarketPreviousClose};
-        });
+      return tryFetch('https://api.allorigins.win/get?url=' + encodeURIComponent(v8url2))
+        .then(function(d){ return parseV8(JSON.parse(d.contents)); });
     }
   ];
+
   var p = Promise.reject(new Error('start'));
   apis.forEach(function(fn){ p = p.catch(function(){ return fn(); }); });
-  return p.catch(function(){ return null; });
+  return p
+    .then(function(r){
+      // Sanity check — prev should never equal price exactly (stale cache)
+      if (!r || !r.price || r.price <= 0) throw new Error('bad price');
+      return r;
+    })
+    .catch(function(){ return null; });
 }
 
-async function fetchAll(){
-  var btn=el('refresh-btn'); if(btn){btn.textContent='⟳';btn.disabled=true;}
-  var res=await Promise.all([fetchPrice('VEQT.TO'),fetchPrice('VFV.TO')]);
-  var v=res[0],f=res[1];
-
-  function applyTicker(data,pId,cId){
-    if(!data){set(pId,'N/A');set(cId,'');return;}
-    var ch=data.price-data.prev,up=ch>=0;
-    set(pId,m$(data.price,2),up?'var(--green)':'var(--red)');
-    set(cId,(up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+((ch/data.prev)*100).toFixed(2)+'%)',up?'var(--green)':'var(--red)');
-  }
-  applyTicker(v,'veqt-p','veqt-c');
-  applyTicker(f,'vfv-p','vfv-c');
-
-  if(v){ VP=v.price; VP_PREV=v.prev; }
-  if(f){ FP=f.price; FP_PREV=f.prev; }
-
-  set('last-updated','Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
-  updateLiveValues();
-  if(btn){btn.textContent='↻ Refresh';btn.disabled=false;}
-}
-
-// ── INIT ──────────────────────────────────────────────────────
-buildSelector();
-buildMain();
-buildTotalLine();
-buildAccountTiles();
-buildTable();
-fetchAll();
-setInterval(fetchAll,60000);
-
-// ══════════════════════════════════════════════
-// TRANSACTIONS
-// ══════════════════════════════════════════════
-var TXN_KEY = 'portfolio_txns_v1';
-var txnFilter = 'all';
-
-function loadTxns() {
-  try { return JSON.parse(localStorage.getItem(TXN_KEY) || '[]'); }
-  catch(e) { return []; }
-}
-function saveTxns(arr) {
-  localStorage.setItem(TXN_KEY, JSON.stringify(arr));
-}
-
-// Auto-calc total when shares or price changes
-document.addEventListener('DOMContentLoaded', function(){
-  var fs=el('f-shares'); if(fs) fs.addEventListener('input', calcTotal);
-  var fp=el('f-price');  if(fp) fp.addEventListener('input', calcTotal);
-});
-function calcTotal() {
-  var s = parseFloat(el('f-shares').value) || 0;
-  var p = parseFloat(el('f-price').value) || 0;
-  el('f-total').value = s && p ? (s*p).toFixed(2) : '';
-}
-
-function addTxn() {
-  var date    = el('f-date').value;
-  var account = el('f-account').value;
-  var type    = el('f-type').value;
-  var symbol  = el('f-symbol').value;
-  var shares  = parseFloat(el('f-shares').value);
-  var price   = parseFloat(el('f-price').value);
-  var note    = el('f-note').value.trim();
-
-  if (!date)            { alert('Please enter a date.'); return; }
-  if (!shares || shares <= 0) { alert('Please enter shares.'); return; }
-  if (!price  || price  <= 0) { alert('Please enter price per share.'); return; }
-
-  var txn = {
-    id: Date.now(),
-    date: date,
-    account: account,
-    type: type,
-    symbol: symbol,
-    shares: shares,
-    price: price,
-    total: parseFloat((shares * price).toFixed(2)),
-    note: note
-  };
-
-  var arr = loadTxns();
-  arr.push(txn);
-  arr.sort(function(a,b){ return b.date.localeCompare(a.date); });
-  saveTxns(arr);
-
-  // Reset form
-  el('f-shares').value = '';
-  el('f-price').value  = '';
-  el('f-total').value  = '';
-  el('f-note').value   = '';
-
-  renderTxns();
-}
-
-function deleteTxn(id) {
-  var arr = loadTxns().filter(function(t){ return t.id !== id; });
-  saveTxns(arr);
-  renderTxns();
-}
-
-function setFilter(f, btn) {
-  txnFilter = f;
-  document.querySelectorAll('.txn-filter').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  renderTxns();
-}
-
-function m$txn(n) {
-  return '$' + Math.abs(n).toLocaleString('en-CA', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-
-function renderTxns() {
-  var all = loadTxns();
-  var filtered = all.filter(function(t) {
-    if (txnFilter === 'all') return true;
-    if (txnFilter === 'buy' || txnFilter === 'sell') return t.type === txnFilter;
-    return t.account === txnFilter;
-  });
-
-  var wrap = el('txn-list-wrap');
-  if (filtered.length === 0) {
-    wrap.innerHTML = '<div class="txn-empty">No transactions yet — add your first trade above</div>';
-  } else {
-    wrap.innerHTML = filtered.map(function(t) {
-      var typeClass = t.type === 'buy' ? 'buy' : t.type === 'sell' ? 'sell' : 'div';
-      var typeLabel = t.type === 'buy' ? 'BUY' : t.type === 'sell' ? 'SELL' : 'DIV';
-      var amtColor  = t.type === 'sell' ? 'var(--red)' : t.type === 'div' ? 'var(--yellow)' : 'var(--green)';
-      var amtSign   = t.type === 'sell' ? '-' : '+';
-      return '<div class="txn-row">' +
-        '<div class="txn-date">' + t.date + '</div>' +
-        '<span class="txn-type ' + typeClass + '">' + typeLabel + '</span>' +
-        '<div>' +
-          '<div class="txn-sym">' + t.symbol + ' <span style="color:var(--dim);font-size:9px;">' + t.account + '</span></div>' +
-          '<div class="txn-detail">' + t.shares.toFixed(4) + ' sh @ $' + t.price.toFixed(2) + (t.note?' · '+t.note:'') + '</div>' +
-        '</div>' +
-        '<div class="txn-amount" style="color:'+amtColor+'">' + amtSign + m$txn(t.total) + '</div>' +
-        '<button class="txn-del" onclick="deleteTxn('+t.id+')" title="Delete">✕</button>' +
-      '</div>';
-    }).join('');
-  }
-
-  // Summary
-  var invested  = all.filter(function(t){ return t.type==='buy'; }).reduce(function(s,t){ return s+t.total; }, 0);
-  var proceeds  = all.filter(function(t){ return t.type==='sell'; }).reduce(function(s,t){ return s+t.total; }, 0);
-  set('ts-count',    all.length);
-  set('ts-invested', m$txn(invested));
-  set('ts-proceeds', m$txn(proceeds));
-  set('txn-meta',    all.length + ' transaction' + (all.length!==1?'s':'') + ' · tap to ' + (el('txn-body').classList.contains('open')?'collapse':'expand'));
-}
-
-function toggleTxn() {
-  var body = el('txn-body');
-  var chev = el('txn-chev');
-  body.classList.toggle('open');
-  chev.classList.toggle('open');
-  renderTxns();
-}
-
-function exportCSV() {
-  var arr = loadTxns();
-  if (!arr.length) { alert('No transactions to export.'); return; }
-  var rows = ['Date,Account,Type,Symbol,Shares,Price,Total,Note'];
-  arr.forEach(function(t) {
-    rows.push([t.date, t.account, t.type.toUpperCase(), t.symbol, t.shares, t.price, t.total, '"'+(t.note||'')+'"'].join(','));
-  });
-  var blob = new Blob([rows.join('\n')], {type:'text/csv'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'portfolio_transactions.csv';
-  a.click();
-}
-
-// Set default date to today
-(function(){
-  var today = new Date().toISOString().split('T')[0];
-  el('f-date').value = today;
-  renderTxns();
-})();
-
-
-// ══════════════════════════════════════════════
-// PORTFOLIO CHATBOT
-// ══════════════════════════════════════════════
-var chatOpen = false;
-var chatHistory = [];
-
-function toggleChat() {
-  chatOpen = !chatOpen;
-  var panel = el('chat-panel');
-  panel.classList.toggle('open', chatOpen);
-  if (chatOpen) {
-    setTimeout(function(){ el('chat-input').focus(); }, 350);
-  }
-}
-
-function askSuggestion(btn) {
-  el('chat-input').value = btn.textContent;
-  sendChat();
-}
-
-function buildPortfolioContext() {
-  var c = calcAccounts(VP, FP);
-  var txns = loadTxns();
-  var total = c.total;
-  var gain  = total - CONTRIB.total;
-
-  // Summarise logged transactions
-  var txnSummary = '';
-  if (txns.length > 0) {
-    var buys  = txns.filter(function(t){ return t.type==='buy'; });
-    var sells = txns.filter(function(t){ return t.type==='sell'; });
-    var totalBuyAmt  = buys.reduce(function(s,t){ return s+t.total; },0);
-    var totalSellAmt = sells.reduce(function(s,t){ return s+t.total; },0);
-    var divs = txns.filter(function(t){ return t.type==='div'; });
-    txnSummary = '\n\nLOGGED TRANSACTIONS (' + txns.length + ' total):\nBuys: '      + buys.length  + ' totalling $' + totalBuyAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nSells: '     + sells.length + ' totalling $' + totalSellAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nDividends: ' + divs.length  + '\nFull list:\n' +
-      txns.map(function(t){
-        return '  ' + t.date + ' ' + t.type.toUpperCase() + ' ' + t.shares + ' ' + t.symbol +
-          ' @$' + t.price + ' = $' + t.total + ' [' + t.account + ']' + (t.note ? ' (' + t.note + ')' : '');
-      }).join('\n');
-  } else {
-    txnSummary = '\n\nNo transactions logged yet in the transaction log.';
-  }
-
-  return 'You are a helpful portfolio assistant for Amit Kumar and Trisha Jacob, a Canadian couple investing in ETFs inside their registered accounts (TFSA and RRSP). ' +
-    'Answer questions about their portfolio concisely and helpfully. Use Canadian dollar formatting. ' +
-    'Here is their current portfolio data as of right now:\n\n' +
-
-    'LIVE ETF PRICES:\n- VEQT.TO (Vanguard All-Equity ETF): $' + VP.toFixed(2) + '\n- VFV.TO (Vanguard S&P 500 ETF): $' + FP.toFixed(2) + '\n\n' +
-
-    'ACCOUNT VALUES (live):\n- Amit TFSA: $' + Math.round(c.amitA).toLocaleString() + ' (contributed $58,905 · holds ' + S.amitTFSA_VEQT + ' VEQT + ' + S.amitTFSA_VFV + ' VFV shares)\n- Amit RRSP: $' + Math.round(c.rrsp).toLocaleString() + ' (book cost $43,521 · holds ' + S.amitRRSP_VEQT + ' VEQT shares)\n- Trisha TFSA: $' + Math.round(c.trishaA).toLocaleString() + ' (contributed $41,499 · holds ' + S.trishaTFSA_VFV + ' VFV shares)\n- Spousal RRSP (Trisha holds, Amit contributes): $' + Math.round(c.spousal).toLocaleString() + ' (original ~$8,583 · holds ' + S.spousal_VEQT + ' VEQT shares + $' + S.spousal_CASH + ' cash)\n\n' +
-
-    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\nTOTAL CONTRIBUTED: $154,533\n' +
-    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/154533)-1)*100).toFixed(1) + '% return)\nOVERALL MULTIPLE: ' + (total/154533).toFixed(2) + 'x\n\n' +
-
-    'PERFORMANCE:\n- TFSA XIRR (Amit + Trisha combined): 27.94% per year\n' +
-    '- Amit TFSA XIRR: 27.94% vs VEQT benchmark 17.5% — beats VEQT by ~$3,133, beats VFV by ~$93,212\n- Trisha TFSA XIRR: ~18.7% — slightly trails VEQT benchmark\n' +
-    '- Amit RRSP CAGR: ~14.2% per year\n- Spousal RRSP return since inception: +136.75%\n' +
-    '- Blended XIRR all accounts: ~24.0% per year\n\n' +
-
-    'VFV vs VEQT ANALYSIS:\n- Oct-Dec 2024: Amit switched 894 VEQT to VFV — cost ~$3,582 vs staying VEQT\n' +
-    '- Jun 2023 round-trip: lost 9 VEQT shares — cost ~$516\n- Trisha VEQT→VFV conversion at ~$140.63 avg — cost ~$2,349\n' +
-    '- Total VFV drag: ~$6,458 gross, ~$2,094 net\n- VEQT has outperformed VFV since late 2024\n\n' +
-
-    'CONTRIBUTIONS HISTORY (key dates):\n- 2018: $9,017 (Amit, WS Robo TFSA start)\n' +
-    '- 2021: $7,675 (Amit, biweekly DCA)\n- 2022: $16,475 (Amit, bear market buys)\n' +
-    '- 2023: $48,062 (Trisha joins Jul 2023 with $41,499 lump sum)\n- 2024: $7,000 (Amit)\n' +
-    '- 2025: $7,000 (Amit)\n- 2026: $7,200 (Amit, to date)\n' +
-    txnSummary;
-}
-
-
-// ── CLAUDE API via CORS proxies ──────────────────────────────────
-async function askClaude(systemPrompt, messages) {
-  var body = JSON.stringify({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 800,
-    system: systemPrompt,
-    messages: messages
-  });
-
-  // Try multiple free CORS proxies in order
-  var proxies = [
-    // Proxy 1: corsproxy.io
-    async function() {
-      var r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
-        body: body
-      });
-      var d = await r.json();
-      if (d.content && d.content[0]) return d.content[0].text;
-      throw new Error('no content');
-    },
-    // Proxy 2: allorigins
-    async function() {
-      var r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
-        body: body
-      });
-      var d = await r.json();
-      if (d.content && d.content[0]) return d.content[0].text;
-      throw new Error('no content');
-    }
-  ];
-
-  // Try each proxy
-  for (var i = 0; i < proxies.length; i++) {
-    try {
-      var result = await proxies[i]();
-      if (result) return result;
-    } catch(e) { /* try next */ }
-  }
-
-  // All proxies failed — use smart local fallback
-  return localAnswer(messages[messages.length-1].content, systemPrompt);
-}
-
-// ── SMART LOCAL ANSWER ENGINE ─────────────────────────────────────
-// Answers common portfolio questions using live data — works fully offline
-
-async function sendChat() {
-  var input = el('chat-input');
-  var msg   = input.value.trim();
-  if (!msg) return;
-
-  input.value = '';
-  input.style.height = 'auto';
-
-  // Hide suggestions after first message
-  var sugg = el('chat-suggestions');
-  if (sugg) sugg.style.display = 'none';
-
-  // Add user message
-  appendMessage('user', msg);
-
-  // Disable send
-  var sendBtn = el('chat-send-btn');
-  sendBtn.disabled = true;
-
-  // Show typing
-  var typingId = showTyping();
-
-  // Build messages array
-  chatHistory.push({role:'user', content: msg});
-
-  try {
-    var systemPrompt = buildPortfolioContext();
-    var reply = await askClaude(systemPrompt, chatHistory);
-    removeTyping(typingId);
-    appendMessage('bot', reply);
-    chatHistory.push({role:'assistant', content: reply});
-    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-  } catch(e) {
-    removeTyping(typingId);
-    appendMessage('bot', 'Sorry, could not get a response. Please try again.');
-  }
-
-  sendBtn.disabled = false;
-  el('chat-input').focus();
-}
-
-function appendMessage(role, text) {
-  var wrap = el('chat-messages');
-  var div  = document.createElement('div');
-  div.className = 'msg ' + role;
-  var time = new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'});
-  // Convert **bold** markdown to <b>
-  var formatted = text
-    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-  formatted = formatted.split('\n').join('<br>');
-  div.innerHTML =
-    '<div class="msg-bubble">' + formatted + '</div>' +
-    '<div class="msg-time">' + (role==='user'?'You':('Portfolio Assistant · '+time)) + '</div>';
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-}
-
-function showTyping() {
-  var wrap = el('chat-messages');
-  var div  = document.createElement('div');
-  var id   = 'typing-' + Date.now();
-  div.id   = id;
-  div.className = 'msg bot';
-  div.innerHTML = '<div class="msg-bubble typing"><span></span><span></span><span></span></div>';
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-  return id;
-}
-
-function removeTyping(id) {
-  var el2 = document.getElementById(id);
-  if (el2) el2.remove();
-}
-
-// Auto-resize textarea
-
-</script>
-
-<!-- CHATBOT FAB -->
-<button class="chat-fab" onclick="toggleChat()" title="Ask about your portfolio">
-  💬
-</button>
-
-<!-- CHAT PANEL -->
-<div class="chat-panel" id="chat-panel">
-  <div class="chat-header">
-    <div class="chat-header-left">
-      <div class="chat-avatar">🤖</div>
-      <div>
-        <div class="chat-title">Portfolio Assistant</div>
-        <div class="chat-subtitle">Knows your transactions, holdings & performance</div>
-      </div>
-    </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-suggestions" id="chat-suggestions">
-    <button class="suggestion" onclick="askSuggestion(this)">How much have I made total?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">Which account is best?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">Did VFV hurt my returns?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">What's my VEQT vs VFV split?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">Should I switch VFV to VEQT?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">How is Trisha doing vs Amit?</button>
-  </div>
-  <div class="chat-messages" id="chat-messages">
-    <div class="msg bot">
-      <div class="msg-bubble">👋 Hi! I know your full portfolio — live prices, share counts, contributions, XIRR, VFV analysis, and all your logged transactions. Ask me anything!</div>
-      <div class="msg-time">Portfolio Assistant</div>
-    </div>
-  </div>
-  <div class="chat-input-wrap">
-    <textarea class="chat-input" id="chat-input" placeholder="Ask about your portfolio…" rows="1"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
-    <button class="chat-send" id="chat-send-btn" onclick="sendChat()">➤</button>
-  </div>
-</div>
-</body>
-</html>
+>
