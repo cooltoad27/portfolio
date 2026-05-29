@@ -181,123 +181,82 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
 </head>
 <body>
 
-<!-- HERO — TOTAL PORTFOLIO (dark terminal style) -->
+<!-- HERO — TOTAL PORTFOLIO -->
 <div style="background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 50%,#2563eb 100%);border-radius:16px;padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;">
-  <!-- rainbow top stripe -->
   <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ffffff,rgba(255,255,255,.4),rgba(255,255,255,.7),#ffffff);"></div>
-  <!-- glow orb -->
-  <div style="position:absolute;bottom:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(63,185,80,.08),transparent 65%);pointer-events:none;"></div>
+  <div style="position:absolute;bottom:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 65%);pointer-events:none;"></div>
 
-  <!-- top row: tag + refresh -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+  <!-- top row: live dot + refresh + privacy toggle -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:6px;">
       <div class="live-dot"></div>
-      <span style="color:rgba(255,255,255,.85);font-size:9px;letter-spacing:2px;text-transform:uppercase;">Total Portfolio · All 4 Accounts</span>
+      <span style="color:rgba(255,255,255,.7);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">All 4 Accounts</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:9px;color:rgba(255,255,255,.8);font-family:inherit;" id="last-updated"></span>
+      <span style="font-size:9px;color:rgba(255,255,255,.6);" id="last-updated"></span>
+      <button onclick="togglePrivacy()" id="privacy-btn" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:11px;border-radius:6px;padding:3px 8px;cursor:pointer;" title="Hide/show values">👁</button>
       <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">↻</button>
     </div>
   </div>
 
-  <!-- big value -->
-  <div style="color:rgba(255,255,255,.85);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">Total Portfolio Value</div>
-  <div style="font-size:32px;font-weight:800;color:#ffffff;line-height:1;margin-bottom:3px;text-shadow:0 1px 4px rgba(0,0,0,.2);" id="tp-total">···</div>
-  <div style="font-size:10px;color:rgba(255,255,255,.95);margin-bottom:16px;" id="tp-sub">Fetching live prices…</div>
+  <!-- total value -->
+  <div style="color:rgba(255,255,255,.7);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:4px;">Total Portfolio Value</div>
+  <div style="font-size:36px;font-weight:800;color:#ffffff;line-height:1;margin-bottom:8px;letter-spacing:-0.5px;" id="tp-total" class="private">···</div>
 
-  <!-- 4 key stats -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Contributed</div>
-      <div style="color:#ffffff;font-size:13px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.15);">$202,603</div>
-    </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Total Gain</div>
-      <div style="font-size:13px;font-weight:700;color:#4ade80;" id="tp-gain">···</div>
-    </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Multiple</div>
-      <div style="font-size:13px;font-weight:700;color:#34d399;" id="tp-mult">···</div>
-    </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Today&#39;s P&amp;L ●</div>
-      <div style="font-size:13px;font-weight:700;" id="tp-daily">···</div>
-      <div style="font-size:8px;color:#484f58;margin-top:2px;" id="tp-daily-sub"></div>
-    </div>
+  <!-- today P&L row — Yahoo-style -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+    <div style="font-size:16px;font-weight:700;" id="tp-daily" class="private">···</div>
+    <div style="font-size:13px;font-weight:600;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 8px;" id="tp-daily-pct" class="private">···</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.6);">Today</div>
   </div>
 
-  <!-- rate of return stats -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">TFSA XIRR</div>
-      <div style="font-size:13px;font-weight:700;color:#3fb950;">27.94% / yr</div>
+  <!-- 2 stat pills: total gain + VEQT ticker -->
+  <div style="display:flex;gap:10px;">
+    <div style="flex:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 12px;">
+      <div style="color:rgba(255,255,255,.7);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600;">Total Return</div>
+      <div style="font-size:14px;font-weight:700;color:#4ade80;" id="tp-gain" class="private">···</div>
     </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">RRSP CAGR</div>
-      <div style="font-size:13px;font-weight:700;color:#58a6ff;">~14.2% / yr</div>
-    </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Blended XIRR</div>
-      <div style="font-size:13px;font-weight:700;color:#bc8cff;">~24.0% / yr</div>
-    </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
-      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Spousal RRSP</div>
-      <div style="font-size:13px;font-weight:700;color:#f0883e;">+136.75%</div>
-    </div>
+    <a href="https://finance.yahoo.com/quote/VEQT.TO/" target="_blank" rel="noopener"
+       style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 12px;text-decoration:none;display:block;">
+      <div style="color:rgba(255,255,255,.6);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">VEQT.TO ↗</div>
+      <div style="color:#ffffff;font-size:16px;font-weight:700;" id="veqt-hero-p">···</div>
+      <div style="font-size:11px;font-weight:600;" id="veqt-hero-c"></div>
+    </a>
   </div>
 </div>
 
-<!-- PRICE STRIP -->
-<div class="price-strip">
-  <div class="ptile">
-    <div class="ptile-sym">VEQT.TO ●</div>
-    <div class="ptile-price" id="veqt-p"><span class="blink">···</span></div>
-    <div class="ptile-chg" id="veqt-c"></div>
-  </div>
-  <div class="ptile">
-    <div class="ptile-sym">VFV.TO ●</div>
-    <div class="ptile-price" id="vfv-p"><span class="blink">···</span></div>
-    <div class="ptile-chg" id="vfv-c"></div>
-  </div>
-</div>
-
-<!-- TOTAL LINE CHART -->
+<!-- COMBINED GROWTH CHART SECTION -->
 <div class="sec">Portfolio Growth Over Time</div>
-<div class="sec-sub">All 4 accounts · last point updates live</div>
-<div class="chart-wrap"><canvas id="total-line-chart" height="220"></canvas></div>
+<div class="sec-sub">All 4 accounts combined · last point live · tap an account below to see per-account view</div>
 
-<!-- PER-ACCOUNT GROWTH CHART -->
-<div class="cwrap" style="margin:0 16px 12px;">
-  <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;" id="acct-growth-title">Account Growth ●</div>
-  <div style="font-size:10px;color:var(--muted);margin-bottom:10px;" id="acct-growth-sub">Tap an account selector below to see its growth</div>
-  <canvas id="acct-growth-chart" height="200"></canvas>
+<!-- Toggle tabs -->
+<div style="display:flex;gap:6px;margin-bottom:10px;">
+  <button id="chart-tab-total" onclick="switchChartTab('total')"
+    style="flex:1;padding:7px 0;font-size:10px;font-weight:700;border-radius:8px;border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;">
+    All Accounts
+  </button>
+  <button id="chart-tab-acct" onclick="switchChartTab('acct')"
+    style="flex:1;padding:7px 0;font-size:10px;font-weight:700;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;">
+    By Account
+  </button>
+</div>
+
+<!-- All accounts chart -->
+<div id="chart-panel-total">
+  <div class="chart-wrap"><canvas id="total-line-chart" height="220"></canvas></div>
+</div>
+
+<!-- Per-account chart -->
+<div id="chart-panel-acct" style="display:none;">
+  <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;" id="acct-growth-title">Account Growth ●</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:8px;" id="acct-growth-sub">Select an account above</div>
+  <div class="chart-wrap"><canvas id="acct-growth-chart" height="220"></canvas></div>
 </div>
 
 
 <!-- BY ACCOUNT BREAKDOWN -->
 <div class="sec">Account Breakdown ●</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px" id="account-tiles"></div>
-
-
-<!-- ACCOUNT SELECTOR -->
-<div class="acct-grid" id="acct-grid"></div>
-
-<!-- DYNAMIC CONTENT -->
-<div id="main-content"></div>
-
-<!-- BOTTOM TABLE -->
-<div class="sec">Full Comparison — All Three Views</div>
-<div class="btbl">
-  <div class="btbl-hdr">
-    <span>Account</span>
-    <span style="text-align:right;color:var(--blue)">Actual XIRR</span>
-    <span style="text-align:right;color:var(--purple)">VEQT</span>
-    <span style="text-align:right;color:var(--orange)">VFV</span>
-  </div>
-  <div id="btbl-rows"></div>
-</div>
-
-<!-- TRANSACTIONS SECTION -->
 <div class="txn-section">
   <div class="txn-toggle" onclick="toggleTxn()">
     <div>
@@ -471,58 +430,173 @@ function askSuggestion(btn) {
   sendChat();
 }
 
+
 function buildPortfolioContext() {
   var c = calcAccounts(VP, FP);
   var txns = loadTxns();
   var total = c.total;
   var gain  = total - CONTRIB.total;
+  var dailyPL = ((S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT)*(VP-VP_PREV)) +
+                ((S.amitTFSA_VFV+S.trishaTFSA_VFV)*(FP-FP_PREV));
 
-  // Summarise logged transactions
-  var txnSummary = '';
-  if (txns.length > 0) {
-    var buys  = txns.filter(function(t){ return t.type==='buy'; });
-    var sells = txns.filter(function(t){ return t.type==='sell'; });
-    var totalBuyAmt  = buys.reduce(function(s,t){ return s+t.total; },0);
-    var totalSellAmt = sells.reduce(function(s,t){ return s+t.total; },0);
-    var divs = txns.filter(function(t){ return t.type==='div'; });
-    txnSummary = '\n\nLOGGED TRANSACTIONS (' + txns.length + ' total):\nBuys: '      + buys.length  + ' totalling $' + totalBuyAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nSells: '     + sells.length + ' totalling $' + totalSellAmt.toLocaleString('en-CA',{maximumFractionDigits:0}) + '\nDividends: ' + divs.length  + '\nFull list:\n' +
-      txns.map(function(t){
-        return '  ' + t.date + ' ' + t.type.toUpperCase() + ' ' + t.shares + ' ' + t.symbol +
-          ' @$' + t.price + ' = $' + t.total + ' [' + t.account + ']' + (t.note ? ' (' + t.note + ')' : '');
-      }).join('\n');
-  } else {
-    txnSummary = '\n\nNo transactions logged yet in the transaction log.';
+  var TRADE_HISTORY = [
+    {d:"2018-04-13",a:"Amit TFSA",br:"Wealthsimple Robo",t:"BUY",sym:"VEQT",q:383,p:23.54,net:9017,note:"Opening WS Robo"},
+    {d:"2021-04-27",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:33.84,net:236.90,note:""},
+    {d:"2021-05-11",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:8,p:32.93,net:263.47,note:""},
+    {d:"2021-06-08",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:34.14,net:239.00,note:""},
+    {d:"2021-06-22",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:34.60,net:242.22,note:""},
+    {d:"2021-07-06",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:35.04,net:245.30,note:""},
+    {d:"2021-07-20",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:35.06,net:245.44,note:""},
+    {d:"2021-08-03",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:35.44,net:248.10,note:""},
+    {d:"2021-08-31",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:6,p:36.33,net:218.00,note:""},
+    {d:"2021-09-07",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:17,p:36.67,net:623.45,note:"From BTCC.B"},
+    {d:"2021-09-14",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:36.28,net:253.98,note:""},
+    {d:"2021-09-28",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:8,p:35.49,net:283.95,note:""},
+    {d:"2021-10-12",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:8,p:35.12,net:280.99,note:""},
+    {d:"2021-10-26",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:36.43,net:255.03,note:""},
+    {d:"2021-11-09",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:8,p:37.08,net:296.67,note:""},
+    {d:"2021-11-23",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:37.09,net:259.65,note:""},
+    {d:"2021-11-26",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:82,p:36.64,net:3004.77,note:"Lump sum"},
+    {d:"2021-12-09",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:8,p:36.92,net:295.39,note:""},
+    {d:"2021-12-24",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:37.45,net:262.17,note:""},
+    {d:"2022-01-05",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:37.02,net:259.16,note:""},
+    {d:"2022-01-18",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:89,p:35.71,net:3177.12,note:"Bear market"},
+    {d:"2022-01-21",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:86,p:34.84,net:2996.54,note:"Bear market"},
+    {d:"2022-02-03",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:6,p:35.66,net:213.98,note:""},
+    {d:"2022-02-16",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:35.55,net:106.65,note:""},
+    {d:"2022-03-01",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:34.42,net:103.26,note:""},
+    {d:"2022-03-18",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:2,p:35.02,net:70.05,note:""},
+    {d:"2022-03-30",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:35.75,net:107.26,note:""},
+    {d:"2022-04-14",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:34.93,net:104.80,note:""},
+    {d:"2022-04-26",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:33.60,net:100.81,note:""},
+    {d:"2022-05-10",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:32.40,net:97.21,note:""},
+    {d:"2022-05-25",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:32.41,net:97.24,note:""},
+    {d:"2022-06-07",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:3,p:32.97,net:98.92,note:""},
+    {d:"2022-07-05",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:7,p:30.57,net:214.01,note:""},
+    {d:"2022-07-13",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:97,p:30.69,net:2977.27,note:"Bear market"},
+    {d:"2022-07-26",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:182,p:31.34,net:5704.17,note:"Bear market"},
+    {d:"2023-02-06",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:6,p:34.23,net:205.40,note:""},
+    {d:"2023-02-10",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:6,p:33.98,net:203.90,note:""},
+    {d:"2023-02-22",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:148,p:33.71,net:4990.18,note:"Lump sum"},
+    {d:"2023-02-23",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:34,p:33.77,net:1148.30,note:""},
+    {d:"2023-06-27",a:"Amit TFSA",br:"Questrade",t:"SELL",sym:"VEQT",q:2815,p:34.40,net:96826,note:"Round trip"},
+    {d:"2023-06-27",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VFV",q:472,p:102.60,net:48427,note:"Round trip"},
+    {d:"2023-08-11",a:"Amit TFSA",br:"Questrade",t:"SELL",sym:"VFV",q:473,p:106.44,net:50340,note:"Back to VEQT"},
+    {d:"2023-08-11",a:"Amit TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:2806,p:35.73,net:100237,note:"Back to VEQT"},
+    {d:"2024-01-10",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:1.3436,p:36.74,net:49.33,note:""},
+    {d:"2024-01-11",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:52.8345,p:36.78,net:1942.77,note:""},
+    {d:"2024-01-15",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:6.8062,p:36.73,net:250,note:""},
+    {d:"2024-01-25",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:6.7061,p:37.19,net:249.37,note:""},
+    {d:"2024-01-30",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:5.3403,p:37.54,net:200.46,note:""},
+    {d:"2024-02-09",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:6.6340,p:37.71,net:250.17,note:""},
+    {d:"2024-02-22",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:6.5513,p:38.16,net:250,note:""},
+    {d:"2024-03-08",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:6.3808,p:39.18,net:250,note:""},
+    {d:"2024-05-22",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:134.4732,p:40.91,net:5500,note:"Lump sum"},
+    {d:"2024-05-28",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:1.2242,p:40.84,net:50,note:""},
+    {d:"2024-10-24",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"SELL",sym:"VEQT",q:156,p:44.81,net:6990,note:"VFV switch"},
+    {d:"2024-10-24",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VFV",q:48.8255,p:143.17,net:6990,note:"VFV switch"},
+    {d:"2024-11-14",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"SELL",sym:"VEQT",q:153,p:45.64,net:6983,note:"VFV switch"},
+    {d:"2024-11-14",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VFV",q:46.9375,p:148.79,net:6983,note:"VFV switch"},
+    {d:"2024-12-24",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"SELL",sym:"VEQT",q:434,p:46.18,net:20042,note:"VFV switch"},
+    {d:"2024-12-24",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VFV",q:131.7377,p:152.17,net:20042,note:"VFV switch"},
+    {d:"2024-12-30",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"SELL",sym:"VEQT",q:151,p:46.42,net:7010,note:"VFV switch"},
+    {d:"2024-12-30",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VFV",q:45.8402,p:152.94,net:7010,note:"VFV switch"},
+    {d:"2025-01-06",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VFV",q:16.5181,p:151.45,net:2500,note:""},
+    {d:"2025-01-08",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:2,p:45.41,net:90.82,note:""},
+    {d:"2025-01-09",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:33.6659,p:45.35,net:1526.75,note:"Div reinvest"},
+    {d:"2025-01-09",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VFV",q:13.9448,p:150.67,net:2100,note:""},
+    {d:"2025-03-19",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:17.7313,p:45.10,net:800,note:""},
+    {d:"2025-03-31",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VEQT",q:18.9723,p:44.82,net:850,note:""},
+    {d:"2025-04-07",a:"Amit TFSA",br:"Wealthsimple Self-Dir",t:"BUY",sym:"VFV",q:0.9389,p:130.98,net:122.97,note:"Div reinvest"},
+    {d:"2026-01-12",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VEQT",q:49.4552,p:55.54,net:2748.37,note:""},
+    {d:"2026-01-19",a:"Amit TFSA",br:"Qtrade (Q5A4YSFL)",t:"BUY",sym:"VFV",q:90,p:171.34,net:15420.60,note:"Transfer in"},
+    {d:"2026-02-05",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VEQT",q:19.987,p:55.35,net:1106.40,note:""},
+    {d:"2026-02-20",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VEQT",q:17.88,p:55.92,net:1000,note:""},
+    {d:"2026-03-18",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VFV",q:18.54,p:161.72,net:2998.29,note:"New contribution"},
+    {d:"2026-03-20",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VEQT",q:20.726,p:53.17,net:1102.20,note:""},
+    {d:"2026-04-06",a:"Amit TFSA",br:"Qtrade (Q5A4YSFL)",t:"BUY",sym:"VFV",q:0.24,p:173.81,net:41.71,note:"Div reinvest"},
+    {d:"2026-04-09",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VEQT",q:1.8007,p:56.09,net:101,note:"Div reinvest"},
+    {d:"2026-05-28",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"SELL",sym:"VFV",q:239.54,p:185.02,net:44319.69,note:"VFV to VEQT switch"},
+    {d:"2026-05-28",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VEQT",q:738.79,p:59.988,net:44317.01,note:"VFV to VEQT switch"},
+    {d:"2026-05-28",a:"Amit TFSA",br:"TD Direct (82BJR7J)",t:"BUY",sym:"VEQT",q:0.056,p:59.99,net:3.36,note:"Fractional"},
+    {d:"2026-05-28",a:"Amit TFSA",br:"Qtrade (Q5A4YSFL)",t:"SELL",sym:"VFV",q:90,p:185.00,net:16650,note:"VFV to VEQT switch"},
+    {d:"2026-05-28",a:"Amit TFSA",br:"Qtrade (Q5A4YSFL)",t:"BUY",sym:"VEQT",q:278,p:59.9664,net:16670.66,note:"VFV to VEQT switch"},
+    {d:"2021-06-24",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:52,p:34.75,net:1807.18,note:"RRSP start"},
+    {d:"2021-07-26",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:1,p:35.37,net:35.37,note:""},
+    {d:"2021-07-30",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:1,p:35.28,net:35.28,note:""},
+    {d:"2021-12-07",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:1,p:36.94,net:36.94,note:""},
+    {d:"2022-05-16",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:33,p:32.34,net:1067.34,note:"Transfer in"},
+    {d:"2022-05-27",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:28,p:33.25,net:931.10,note:"Transfer in"},
+    {d:"2022-07-05",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:1,p:30.55,net:30.55,note:""},
+    {d:"2022-08-02",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:375,p:32.51,net:12192.56,note:"Major contribution"},
+    {d:"2023-01-04",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:26,p:32.29,net:839.63,note:""},
+    {d:"2024-01-09",a:"Amit RRSP",br:"Questrade RRSP",t:"BUY",sym:"VEQT",q:1,p:36.77,net:36.77,note:""},
+    {d:"2026-01-15",a:"Amit RRSP",br:"TD Direct (82BJR7S)",t:"BUY",sym:"VEQT",q:1402,p:55.80,net:78231.60,note:"Transfer from Questrade"},
+    {d:"2026-02-05",a:"Amit RRSP",br:"TD Direct (82BJR7S)",t:"BUY",sym:"VEQT",q:0.987,p:55.40,net:54.68,note:"Div reinvest"},
+    {d:"2026-02-20",a:"Amit RRSP",br:"TD Direct (82BJR7S)",t:"BUY",sym:"VEQT",q:17.88,p:55.92,net:1000,note:""},
+    {d:"2026-03-20",a:"Amit RRSP",br:"TD Direct (82BJR7S)",t:"BUY",sym:"VEQT",q:0.726,p:53.17,net:38.60,note:""},
+    {d:"2026-04-09",a:"Amit RRSP",br:"TD Direct (82BJR7S)",t:"BUY",sym:"VEQT",q:1.8007,p:56.09,net:101,note:"Div reinvest"},
+    {d:"2023-07-17",a:"Trisha TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:904,p:35.50,net:32092.01,note:"Trisha start"},
+    {d:"2023-07-26",a:"Trisha TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:234,p:35.96,net:8414.76,note:""},
+    {d:"2023-07-31",a:"Trisha TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:27,p:36.16,net:976.41,note:""},
+    {d:"2024-01-09",a:"Trisha TFSA",br:"Questrade",t:"BUY",sym:"VEQT",q:22,p:36.77,net:809.02,note:""},
+    {d:"2024-01-17",a:"Trisha TFSA",br:"Questrade",t:"SELL",sym:"VEQT",q:1187,p:36.77,net:43635.99,note:"In-kind to VFV"},
+    {d:"2024-03-01",a:"Trisha TFSA",br:"TD Direct (82BJR6J)",t:"BUY",sym:"VFV",q:287.172,p:140.63,net:40387.58,note:"Avg book cost"},
+    {d:"2026-01-19",a:"Trisha TFSA",br:"Qtrade (Q5A4YSLL)",t:"BUY",sym:"VFV",q:97.998,p:157.36,net:15421.21,note:"Transfer in"},
+    {d:"2026-04-06",a:"Trisha TFSA",br:"TD Direct (82BJR6J)",t:"BUY",sym:"VFV",q:0.70,p:173.81,net:121.67,note:"Div reinvest"},
+    {d:"2026-05-28",a:"Trisha TFSA",br:"TD Direct (82BJR6J)",t:"SELL",sym:"VFV",q:287.172,p:185.01,net:53129.69,note:"VFV to VEQT switch"},
+    {d:"2026-05-28",a:"Trisha TFSA",br:"TD Direct (82BJR6J)",t:"BUY",sym:"VEQT",q:885.60,p:59.98,net:53118.29,note:"VFV to VEQT switch"},
+    {d:"2026-05-28",a:"Trisha TFSA",br:"TD Direct (82BJR6J)",t:"BUY",sym:"VEQT",q:0.22,p:59.98,net:13.20,note:"Fractional"},
+    {d:"2026-05-28",a:"Trisha TFSA",br:"Qtrade (Q5A4YSLL)",t:"SELL",sym:"VFV",q:93,p:184.93,net:17198.49,note:"VFV to VEQT switch"},
+    {d:"2026-05-28",a:"Trisha TFSA",br:"Qtrade (Q5A4YSLL)",t:"BUY",sym:"VEQT",q:287,p:59.98,net:17214.26,note:"VFV to VEQT switch"},
+    {d:"2021-01-01",a:"Spousal RRSP",br:"Questrade (51964229)",t:"BUY",sym:"VEQT",q:323.47,p:26.53,net:8583,note:"Opening estimated"},
+    {d:"2022-03-10",a:"Spousal RRSP",br:"Questrade (51964229)",t:"BUY",sym:"VEQT",q:4,p:34.12,net:136.48,note:"Div reinvest"},
+    {d:"2023-02-22",a:"Spousal RRSP",br:"Questrade (51964229)",t:"BUY",sym:"VEQT",q:7,p:33.75,net:236.27,note:"Div reinvest"},
+    {d:"2024-01-09",a:"Spousal RRSP",br:"Questrade (51964229)",t:"BUY",sym:"VEQT",q:6,p:36.77,net:220.64,note:"Div reinvest"},
+    {d:"2025-01-09",a:"Spousal RRSP",br:"Questrade (51964229)",t:"BUY",sym:"VEQT",q:5,p:45.61,net:228.07,note:"Div reinvest"},
+    {d:"2026-01-12",a:"Spousal RRSP",br:"Questrade (51964229)",t:"BUY",sym:"VEQT",q:4,p:55.84,net:223.36,note:"Div reinvest"},
+  ];
+
+  // Build trade summary by account
+  var tradeLines = '';
+  ['Amit TFSA','Amit RRSP','Trisha TFSA','Spousal RRSP'].forEach(function(acct){
+    var trades = TRADE_HISTORY.filter(function(t){return t.a===acct;});
+    tradeLines += acct.toUpperCase() + ' (' + trades.length + ' trades):\n';
+    trades.forEach(function(t){
+      tradeLines += '  '+t.d+' '+t.t+' '+t.q+' '+t.sym+'.TO @$'+t.p+(t.net?' $'+t.net:'') +' via '+t.br+(t.note?' ['+t.note+']':'')+'\n';
+    });
+    tradeLines += '\n';
+  });
+  var totalBought = TRADE_HISTORY.filter(function(t){return t.t==='BUY';}).reduce(function(s,t){return s+(t.net||0);},0);
+  var totalSold   = TRADE_HISTORY.filter(function(t){return t.t==='SELL';}).reduce(function(s,t){return s+(t.net||0);},0);
+
+  var loggedTxns = '';
+  if(txns.length > 0){
+    var buys=txns.filter(function(t){return t.type==='buy';});
+    var sells=txns.filter(function(t){return t.type==='sell';});
+    var divs=txns.filter(function(t){return t.type==='div';});
+    loggedTxns='\n\nUSER-LOGGED TRANSACTIONS ('+txns.length+'):\n'+
+      'Buys: '+buys.length+' | Sells: '+sells.length+' | Divs: '+divs.length+'\n'+
+      txns.map(function(t){return '  '+t.date+' '+t.type.toUpperCase()+' '+t.shares+' '+t.symbol+' @$'+t.price+' ['+t.account+']'+(t.note?' ('+t.note+')':'');}).join('\n');
   }
 
-  return 'You are a helpful portfolio assistant for Amit Kumar and Trisha Jacob, a Canadian couple investing in ETFs inside their registered accounts (TFSA and RRSP). ' +
-    'Answer questions about their portfolio concisely and helpfully. Use Canadian dollar formatting. ' +
-    'Here is their current portfolio data as of right now:\n\n' +
-
-    'LIVE ETF PRICES:\n- VEQT.TO (Vanguard All-Equity ETF): $' + VP.toFixed(2) + '\n- VFV.TO (Vanguard S&P 500 ETF): $' + FP.toFixed(2) + '\n\n' +
-
-    'ACCOUNT VALUES (live):\n- Amit TFSA: $' + Math.round(c.amitA).toLocaleString() + ' (contributed $58,905 · holds ' + S.amitTFSA_VEQT + ' VEQT + ' + S.amitTFSA_VFV + ' VFV shares)\n- Amit RRSP: $' + Math.round(c.rrsp).toLocaleString() + ' (book cost $43,521 · holds ' + S.amitRRSP_VEQT + ' VEQT shares)\n- Trisha TFSA: $' + Math.round(c.trishaA).toLocaleString() + ' (contributed $41,499 · holds ' + S.trishaTFSA_VFV + ' VFV shares)\n- Spousal RRSP (Trisha holds, Amit contributes): $' + Math.round(c.spousal).toLocaleString() + ' (original ~$8,583 · holds ' + S.spousal_VEQT + ' VEQT shares + $' + S.spousal_CASH + ' cash)\n\n' +
-
-    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\nTOTAL CONTRIBUTED: $202,603\n' +
-    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/202603)-1)*100).toFixed(1) + '% return)\nOVERALL MULTIPLE: ' + (total/202603).toFixed(2) + 'x\n\n' +
-
-    'PERFORMANCE:\n- TFSA XIRR (Amit + Trisha combined): 27.94% per year\n' +
-    '- Amit TFSA XIRR: 27.94% vs VEQT benchmark 17.5% — beats VEQT by ~$3,133, beats VFV by ~$93,212\n- Trisha TFSA XIRR: ~18.7% — slightly trails VEQT benchmark\n' +
-    '- Amit RRSP CAGR: ~14.2% per year\n- Spousal RRSP return since inception: +136.75%\n' +
-    '- Blended XIRR all accounts: ~24.0% per year\n\n' +
-
-    'VFV vs VEQT ANALYSIS:\n- Oct-Dec 2024: Amit switched 894 VEQT to VFV — cost ~$3,582 vs staying VEQT\n' +
-    '- Jun 2023 round-trip: lost 9 VEQT shares — cost ~$516\n- Trisha VEQT→VFV conversion at ~$140.63 avg — cost ~$2,349\n' +
-    '- Total VFV drag: ~$6,458 gross, ~$2,094 net\n- VEQT has outperformed VFV since late 2024\n\n' +
-
-    'CONTRIBUTIONS HISTORY (key dates):\n- 2018: $9,017 (Amit, WS Robo TFSA start)\n' +
-    '- 2021: $7,675 (Amit, biweekly DCA)\n- 2022: $16,475 (Amit, bear market buys)\n' +
-    '- 2023: $48,062 (Trisha joins Jul 2023 with $41,499 lump sum)\n- 2024: $7,000 (Amit)\n' +
-    '- 2025: $7,000 (Amit)\n- 2026: $7,200 (Amit, to date)\n' +
-    txnSummary;
+  return 'You are a helpful portfolio assistant for Amit Kumar and Trisha Jacob, a Canadian couple investing in ETFs. Answer concisely in CAD.\n\n' +
+    'LIVE: VEQT.TO $'+VP.toFixed(2)+' | VFV.TO $'+FP.toFixed(2)+'\n\n' +
+    'ACCOUNTS:\n' +
+    '- Amit TFSA: $'+Math.round(c.amitA).toLocaleString()+' ('+S.amitTFSA_VEQT+' VEQT + '+S.amitTFSA_VFV+' VFV)\n' +
+    '- Amit RRSP: $'+Math.round(c.rrsp).toLocaleString()+' ('+S.amitRRSP_VEQT+' VEQT)\n' +
+    '- Trisha TFSA: $'+Math.round(c.trishaA).toLocaleString()+' ('+(S.trishaTFSA_VEQT||0).toFixed(0)+' VEQT + '+S.trishaTFSA_VFV.toFixed(2)+' VFV)\n' +
+    '- Spousal RRSP: $'+Math.round(c.spousal).toLocaleString()+' ('+S.spousal_VEQT+' VEQT)\n\n' +
+    'TOTAL: $'+Math.round(total).toLocaleString()+' | Contributed: $202,603 | Gain: $'+Math.round(gain).toLocaleString()+' | Today P&L: $'+Math.round(dailyPL).toLocaleString()+'\n\n' +
+    'RETURNS: TFSA XIRR 27.94%/yr | RRSP ~14.2% | Blended ~24.0% | Spousal +136.75%\n\n' +
+    'KEY EVENT May 28 2026: Both sold ALL VFV, bought VEQT (~$131k switched). Now ~100% VEQT.\n' +
+    'VFV drag vs VEQT was ~$5,923 total before switch.\n\n' +
+    'TRADE HISTORY ('+TRADE_HISTORY.length+' trades via TD Direct, Qtrade, Questrade, Wealthsimple):\n' +
+    'Bought: $'+Math.round(totalBought).toLocaleString()+' | Sold: $'+Math.round(totalSold).toLocaleString()+'\n\n' +
+    tradeLines + loggedTxns;
 }
 
-
-// ── CLAUDE API via CORS proxies ──────────────────────────────────
+// ── CLAUDE API + LOCAL FALLBACK ───────────────────────────────
 async function askClaude(systemPrompt, messages) {
   var body = JSON.stringify({
     model: 'claude-sonnet-4-20250514',
@@ -530,423 +604,258 @@ async function askClaude(systemPrompt, messages) {
     system: systemPrompt,
     messages: messages
   });
-
-  // Try multiple free CORS proxies in order
   var proxies = [
-    // Proxy 1: corsproxy.io
-    async function() {
-      var r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
-        body: body
-      });
-      var d = await r.json();
-      if (d.content && d.content[0]) return d.content[0].text;
-      throw new Error('no content');
-    },
-    // Proxy 2: allorigins
-    async function() {
-      var r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.anthropic.com/v1/messages'), {
-        method: 'POST',
-        headers: {'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
-        body: body
-      });
-      var d = await r.json();
-      if (d.content && d.content[0]) return d.content[0].text;
-      throw new Error('no content');
-    }
+    function(){return fetch('https://corsproxy.io/?'+encodeURIComponent('https://api.anthropic.com/v1/messages'),{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},body:body}).then(function(r){return r.json();}).then(function(d){if(d.content&&d.content[0])return d.content[0].text;throw new Error('no content');});},
+    function(){return fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://api.anthropic.com/v1/messages'),{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},body:body}).then(function(r){return r.json();}).then(function(d){if(d.content&&d.content[0])return d.content[0].text;throw new Error('no content');});}
   ];
-
-  // Try each proxy
-  for (var i = 0; i < proxies.length; i++) {
-    try {
-      var result = await proxies[i]();
-      if (result) return result;
-    } catch(e) { /* try next */ }
-  }
-
-  // All proxies failed — use smart local fallback
-  return localAnswer(messages[messages.length-1].content, systemPrompt);
+  var p = Promise.reject();
+  proxies.forEach(function(fn){p=p.catch(function(){return fn();});});
+  return p.catch(function(){return localAnswer(messages[messages.length-1].content);});
 }
 
-// ── SMART LOCAL ANSWER ENGINE ─────────────────────────────────────
-// Answers common portfolio questions using live data — works fully offline
-function localAnswer(question, context) {
+function localAnswer(question) {
   var q = question.toLowerCase();
-  var c = calcAccounts(VP, FP);
-  var total = c.total;
-  var gain  = total - 202603;
-  var txns  = loadTxns();
-  var totalVEQT = S.amitTFSA_VEQT + (S.trishaTFSA_VEQT||0) + S.amitRRSP_VEQT + S.spousal_VEQT;
-  var totalVFV  = S.amitTFSA_VFV  + S.trishaTFSA_VFV;
-  var veqtVal   = totalVEQT * VP;
-  var vfvVal    = totalVFV  * FP;
-  var veqtPct   = (veqtVal / total * 100).toFixed(1);
-  var vfvPct    = (vfvVal  / total * 100).toFixed(1);
-  var dailyPL   = (totalVEQT*(VP-VP_PREV)) + (totalVFV*(FP-FP_PREV));
+  var c = calcAccounts(VP,FP);
+  var total=c.total, gain=total-202603;
+  var totalVEQT=S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT;
+  var totalVFV=S.amitTFSA_VFV+S.trishaTFSA_VFV;
+  var dailyPL=(totalVEQT*(VP-VP_PREV))+(totalVFV*(FP-FP_PREV));
 
-  if (q.match(/how much.*(made|gained|profit|return|up)/i) || q.match(/total.*(gain|profit|return)/i)) {
-    return ['**Total portfolio gain: +' + m$(Math.round(gain)) + '** (' + (((total/202603)-1)*100).toFixed(1) + '% return)',
-      'Amt TFSA: +' + m$(Math.round(c.amitA-109000)),
-      'Amit RRSP: +' + m$(Math.round(c.rrsp-43521)),
-      'Trisha TFSA: +' + m$(Math.round(c.trishaA-41499)),
-      'Spousal RRSP: +' + m$(Math.round(c.spousal-8583))].join('\n');
+  if(q.match(/made|gain|profit|return|up/i))
+    return ['**Total gain: +$'+Math.round(gain).toLocaleString()+'** ('+(((total/202603)-1)*100).toFixed(1)+'%)',
+      'Amit TFSA: +$'+Math.round(c.amitA-109000).toLocaleString(),
+      'Amit RRSP: +$'+Math.round(c.rrsp-43521).toLocaleString(),
+      'Trisha TFSA: +$'+Math.round(c.trishaA-41499).toLocaleString(),
+      'Spousal RRSP: +$'+Math.round(c.spousal-8583).toLocaleString()].join('\n');
+
+  if(q.match(/total|portfolio|value|worth|balance/i))
+    return ['**Total: $'+Math.round(total).toLocaleString()+'**',
+      'Amit TFSA: $'+Math.round(c.amitA).toLocaleString(),
+      'Amit RRSP: $'+Math.round(c.rrsp).toLocaleString(),
+      'Trisha TFSA: $'+Math.round(c.trishaA).toLocaleString(),
+      'Spousal RRSP: $'+Math.round(c.spousal).toLocaleString(),
+      'VEQT @ $'+VP.toFixed(2)].join('\n');
+
+  if(q.match(/today|daily|day|p&l/i))
+    return '**Today P&L: '+(dailyPL>=0?'+':'')+Math.round(dailyPL).toLocaleString()+'**\nVEQT: '+(VP-VP_PREV>=0?'+':'')+(VP-VP_PREV).toFixed(2)+'/sh x '+totalVEQT.toFixed(0)+' shares\nVFV: '+(FP-FP_PREV>=0?'+':'')+(FP-FP_PREV).toFixed(2)+'/sh x '+totalVFV.toFixed(0)+' shares';
+
+  if(q.match(/veqt|vfv|split|etf/i))
+    return ['**ETF split:**','VEQT: $'+Math.round(totalVEQT*VP).toLocaleString()+' ('+((totalVEQT*VP/total)*100).toFixed(1)+'%) — '+totalVEQT.toFixed(0)+' shares','VFV: $'+Math.round(totalVFV*FP).toLocaleString()+' ('+((totalVFV*FP/total)*100).toFixed(1)+'%) — '+totalVFV.toFixed(0)+' shares','May 28 2026: Sold ALL VFV, bought VEQT. Now ~100% VEQT.'].join('\n');
+
+  if(q.match(/xirr|return rate|annual|cagr/i))
+    return '**Returns:**\nTFSA XIRR: 27.94%/yr\nRRSP CAGR: ~14.2%/yr\nBlended: ~24.0%/yr\nSpousal: +136.75% total\nVEQT benchmark: 15.96%/yr — beat by ~12pp';
+
+  if(q.match(/best|top|perform/i)){
+    var accs=[{n:'Amit TFSA',v:c.amitA,c:109000},{n:'Amit RRSP',v:c.rrsp,c:43521},{n:'Trisha TFSA',v:c.trishaA,c:41499},{n:'Spousal',v:c.spousal,c:8583}];
+    accs.sort(function(a,b){return(b.v/b.c)-(a.v/a.c);});
+    return '**Best: '+accs[0].n+' ('+((accs[0].v/accs[0].c)*100).toFixed(0)+'% return)**\n'+accs.map(function(a){return a.n+': $'+Math.round(a.v).toLocaleString()+' ('+((a.v/a.c)*100).toFixed(0)+'%)';}).join('\n');
   }
-  if (q.match(/best|top|highest|performing|winner/i)) {
-    var accs = [
-      {n:'Amit TFSA',   v:c.amitA,   c:109000},
-      {n:'Amit RRSP',   v:c.rrsp,    c:43521},
-      {n:'Trisha TFSA', v:c.trishaA, c:41499},
-      {n:'Spousal RRSP',v:c.spousal, c:8583}
-    ].sort(function(a,b){ return (b.v/b.c)-(a.v/a.c); });
-    return ['**Best: ' + accs[0].n + ' at ' + (accs[0].v/accs[0].c).toFixed(2) + 'x**'].concat(
-      accs.map(function(a){ return a.n+': '+m$(Math.round(a.v))+' ('+( a.v/a.c).toFixed(2)+'x)'; })
-    ).join('\n');
+
+  if(q.match(/may 28|switch|vfv.*veqt|sold.*vfv/i))
+    return '**May 28 2026 Switch:**\nAmit sold 239.54 VFV @$185.02 (TD) + 90 VFV @$185 (Qtrade)\nAmit bought 738.85 VEQT @$59.99 (TD) + 278 VEQT @$59.97 (Qtrade)\nTrisha sold 287.172 VFV @$185.01 (TD) + 93 VFV @$184.93 (Qtrade)\nTrisha bought 885.82 VEQT @$59.98 (TD) + 287 VEQT @$59.98 (Qtrade)\nTotal switched: ~$131,298\nNow ~100% VEQT across all accounts';
+
+  if(q.match(/contribut|invest|deposit/i))
+    return '**Contributions: $202,603 total**\nAmit TFSA: $109,000\nAmit RRSP: $43,521\nTrisha TFSA: $41,499\nSpousal RRSP: $8,583\n\nKey dates: 2022 bear market buys, Jul 2023 Trisha $41,499 lump sum';
+
+  if(q.match(/transaction|trade|history|broker|questrade|wealthsimple|td|qtrade/i)){
+    var txns=loadTxns();
+    var buys=txns.filter(function(t){return t.type==='buy';});
+    return ['**115 trades across all brokers:**',
+      'TD Direct: Amit TFSA (82BJR7J), Amit RRSP (82BJR7S), Trisha TFSA (82BJR6J)',
+      'Qtrade: Amit (Q5A4YSFL), Trisha (Q5A4YSLL)',
+      'Questrade: Amit TFSA, Amit RRSP, Trisha TFSA, Spousal RRSP (51964229)',
+      'Wealthsimple: Robo (2018-2020), Self-Dir (2024)',
+      'Ask about a specific account or date range for details.',
+      txns.length>0?'User-logged: '+txns.length+' additional trades':''].join('\n');
   }
-  if (q.match(/veqt|vfv|split|etf|mix|allocation/i)) {
-    return ['**Current ETF split:**',
-      'VEQT: ' + m$(Math.round(veqtVal)) + ' (' + veqtPct + '%) — ' + totalVEQT.toFixed(0) + ' shares @ $' + VP.toFixed(2),
-      'VFV:  ' + m$(Math.round(vfvVal))  + ' (' + vfvPct  + '%) — ' + totalVFV.toFixed(0)  + ' shares @ $' + FP.toFixed(2),
-      'VFV cost vs VEQT: ~-$5,923. VEQT has outperformed since late 2024.'].join('\n');
-  }
-  if (q.match(/total|portfolio|worth|value|balance/i)) {
-    return ['**Total portfolio: ' + m$(Math.round(total)) + '**',
-      'Amit TFSA: ' + m$(Math.round(c.amitA)),
-      'Amit RRSP: ' + m$(Math.round(c.rrsp)),
-      'Trisha TFSA: ' + m$(Math.round(c.trishaA)),
-      'Spousal RRSP: ' + m$(Math.round(c.spousal)),
-      'VEQT @ $' + VP.toFixed(2) + ' · VFV @ $' + FP.toFixed(2)].join('\n');
-  }
-  if (q.match(/trisha/i) && q.match(/amit/i)) {
-    return ['**Amit vs Trisha TFSA:**',
-      'Amit: ' + m$(Math.round(c.amitA)) + ' on $109,000 → ' + (c.amitA/109000).toFixed(2) + 'x (27.94% XIRR)',
-      'Trisha: ' + m$(Math.round(c.trishaA)) + ' on $41,499 → ' + (c.trishaA/41499).toFixed(2) + 'x (~18.7% XIRR)',
-      "Amit's edge: 2022 bear market buys + 8 years of DCA."].join('\n');
-  }
-  if (q.match(/today|daily|day/i)) {
-    return ['**Today P&L: ' + (dailyPL>=0?'+':'') + m$(Math.round(dailyPL)) + '**',
-      'VEQT: ' + (VP-VP_PREV>=0?'+':'') + (VP-VP_PREV).toFixed(2) + '/sh x ' + totalVEQT.toFixed(0) + ' shares',
-      'VFV: '  + (FP-FP_PREV>=0?'+':'') + (FP-FP_PREV).toFixed(2) + '/sh x ' + totalVFV.toFixed(0)  + ' shares'].join('\n');
-  }
-  if (q.match(/xirr|rate|return|percent|annualised|cagr/i)) {
-    return ['**Annual returns:**',
-      'Combined TFSA XIRR: **27.94%/yr**',
-      'Trisha TFSA XIRR: ~18.7%/yr',
-      'Amit RRSP CAGR: ~14.2%/yr',
-      'Spousal RRSP: +136.75% total',
-      'Blended all accounts: ~24.0%/yr',
-      'VEQT benchmark: 15.96%/yr — you beat it by ~12pp.'].join('\n');
-  }
-  if (q.match(/contribut|invest|put in|deposit/i)) {
-    return ['**Total contributed: $202,603**',
-      '2018: $9,017 · 2021: $7,675 · 2022: $16,475',
-      '2023: $48,062 (Trisha joins) · 2024: $7,000',
-      '2025: $7,000 · 2026: $7,200'].join('\n');
-  }
-  if (q.match(/transaction|trade|buy|sell|history/i)) {
-    if (!txns.length) return 'No transactions logged yet. Use the Transaction Log to add trades.';
-    var buys = txns.filter(function(t){ return t.type==='buy'; });
-    var sells = txns.filter(function(t){ return t.type==='sell'; });
-    return ['**Transactions: ' + txns.length + ' total**',
-      'Buys: ' + buys.length + ' ($' + Math.round(buys.reduce(function(s,t){return s+t.total;},0)).toLocaleString() + ')',
-      'Sells: ' + sells.length,
-      'Recent: ' + txns.slice(0,3).map(function(t){ return t.date+' '+t.type.toUpperCase()+' '+t.shares+'x'+t.symbol; }).join(', ')].join('\n');
-  }
-  return ['I can answer questions about:',
-    '- Portfolio value & gain',
-    '- Account breakdown',
-    '- VEQT vs VFV split',
-    '- Daily P&L',
-    '- XIRR returns',
-    '- Contributions',
-    '- Logged transactions',
-    'Try: "How much have I made?" or "What is my XIRR?"'].join('\n');
+
+  return ['I know your full portfolio — ask me about:',
+    '- Total value & gain','- Today P&L','- Account breakdown',
+    '- VEQT vs VFV split','- XIRR returns','- May 28 switch',
+    '- Contributions','- Trade history by broker'].join('\n');
 }
-
 
 async function sendChat() {
   var input = el('chat-input');
-  var msg   = input.value.trim();
-  if (!msg) return;
-
+  var msg = input.value.trim();
+  if(!msg) return;
   input.value = '';
   input.style.height = 'auto';
-
-  // Hide suggestions after first message
   var sugg = el('chat-suggestions');
-  if (sugg) sugg.style.display = 'none';
-
-  // Add user message
+  if(sugg) sugg.style.display = 'none';
   appendMessage('user', msg);
-
-  // Disable send
   var sendBtn = el('chat-send-btn');
-  sendBtn.disabled = true;
-
-  // Show typing
+  if(sendBtn) sendBtn.disabled = true;
   var typingId = showTyping();
-
-  // Build messages array
-  chatHistory.push({role:'user', content: msg});
-
+  chatHistory.push({role:'user', content:msg});
   try {
-    var systemPrompt = buildPortfolioContext();
-    var reply = await askClaude(systemPrompt, chatHistory);
+    var sp = buildPortfolioContext();
+    var reply = await askClaude(sp, chatHistory);
     removeTyping(typingId);
     appendMessage('bot', reply);
-    chatHistory.push({role:'assistant', content: reply});
-    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+    chatHistory.push({role:'assistant', content:reply});
+    if(chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
   } catch(e) {
     removeTyping(typingId);
-    appendMessage('bot', 'Sorry, could not get a response. Please try again.');
+    appendMessage('bot', 'Sorry, could not get a response. Try again.');
   }
-
-  sendBtn.disabled = false;
+  if(sendBtn) sendBtn.disabled = false;
   el('chat-input').focus();
 }
 
 function appendMessage(role, text) {
   var wrap = el('chat-messages');
-  var div  = document.createElement('div');
+  var div = document.createElement('div');
   div.className = 'msg ' + role;
   var time = new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'});
-  // Convert **bold** markdown to <b>
-  var formatted = text
-    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+  var formatted = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   formatted = formatted.split('\n').join('<br>');
-  div.innerHTML =
-    '<div class="msg-bubble">' + formatted + '</div>' +
-    '<div class="msg-time">' + (role==='user'?'You':('Portfolio Assistant · '+time)) + '</div>';
+  div.innerHTML = '<div class="msg-bubble">'+formatted+'</div><div class="msg-time">'+(role==='user'?'You':'Assistant \u00b7 '+time)+'</div>';
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
 }
 
 function showTyping() {
   var wrap = el('chat-messages');
-  var div  = document.createElement('div');
-  var id   = 'typing-' + Date.now();
-  div.id   = id;
-  div.className = 'msg bot';
+  var div = document.createElement('div');
+  var id = 'typing-'+Date.now();
+  div.id = id; div.className = 'msg bot';
   div.innerHTML = '<div class="msg-bubble typing"><span></span><span></span><span></span></div>';
   wrap.appendChild(div);
   wrap.scrollTop = wrap.scrollHeight;
   return id;
 }
+function removeTyping(id) { var e=document.getElementById(id); if(e)e.remove(); }
 
-function removeTyping(id) {
-  var el2 = document.getElementById(id);
-  if (el2) el2.remove();
+// ── TRANSACTION HISTORY (read-only) ──────────────────────────
+function toggleHistory(){
+  var b=el('hist-body'),c=el('hist-chev');
+  if(b)b.classList.toggle('open');
+  if(c)c.classList.toggle('open');
+  renderHistory();
 }
-
-// Auto-resize textarea
-
-// Safe event listeners — added after DOM ready
-document.addEventListener('DOMContentLoaded', function(){
-  var ci = el('chat-input');
-  if(ci) ci.addEventListener('input', function(){
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-  });
-});
-
-// ── TRANSACTION HISTORY (read-only expandable) ──────
-var histFilter = 'all';
-
-function toggleHistory() {
-  var body = el('hist-body');
-  var chev = el('hist-chev');
-  var isOpen = body.classList.toggle('open');
-  chev.classList.toggle('open', isOpen);
-  if (isOpen) renderHistory();
-}
-
-function setHistFilter(f, btn) {
-  histFilter = f;
-  document.querySelectorAll('#hist-filters .txn-filter').forEach(function(b){ b.classList.remove('active'); });
+var histFilter='all';
+function setHistFilter(f,btn){
+  histFilter=f;
+  document.querySelectorAll('#hist-filters .txn-filter').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   renderHistory();
 }
-
-function renderHistory() {
-  var all  = loadTxns();
-  var filtered = all.filter(function(t) {
-    if (histFilter === 'all') return true;
-    if (histFilter === 'buy' || histFilter === 'sell' || histFilter === 'div') return t.type === histFilter;
-    return t.account === histFilter;
+function renderHistory(){
+  // Merge hardcoded broker history with user-logged transactions
+  var HIST = buildHistoryTxns();
+  var userTxns = loadTxns();
+  // Convert userTxns to same format
+  var userConverted = userTxns.map(function(t){
+    return {date:t.date,account:t.account,broker:'Manual',type:t.type,
+            symbol:t.symbol,shares:t.shares,price:t.price,net:t.total,note:t.note||''};
   });
-
-  // Update summary stats
-  var buys = filtered.filter(function(t){ return t.type==='buy'; });
-  var sells = filtered.filter(function(t){ return t.type==='sell'; });
-  var invested  = buys.reduce(function(s,t){ return s+t.total; }, 0);
-  var proceeds  = sells.reduce(function(s,t){ return s+t.total; }, 0);
-  set('hs-count',    filtered.length);
-  set('hs-invested', m$txn(invested));
-  set('hs-proceeds', m$txn(proceeds));
-  set('hist-meta',   all.length + ' transaction' + (all.length!==1?'s':'') + ' logged');
-
-  var wrap = el('hist-list');
-  if (!filtered.length) {
-    wrap.innerHTML = '<div class="txn-empty">No transactions yet — add them in the Transaction Log above</div>';
-    return;
-  }
-
-  // Group by account for better readability
-  wrap.innerHTML = filtered.map(function(t) {
-    var typeClass = t.type==='buy'?'buy':t.type==='sell'?'sell':'div';
-    var typeLabel = t.type==='buy'?'BUY':t.type==='sell'?'SELL':'DIV';
-    var amtCol    = t.type==='sell'?'#dc2626':t.type==='div'?'#b45309':'#16a34a';
-    var amtSign   = t.type==='sell'?'-':'+';
-    return '<div style="display:grid;grid-template-columns:80px 36px 1fr auto;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:10px;">' +
-      '<div style="font-family:inherit;color:var(--muted);">' + t.date + '</div>' +
-      '<span class="txn-type ' + typeClass + '">' + typeLabel + '</span>' +
-      '<div>' +
-        '<div style="font-weight:700;color:var(--text);">' + t.symbol +
-          ' <span style="color:var(--dim);font-size:8px;font-weight:400;">' + t.account + '</span></div>' +
-        '<div style="color:var(--muted);font-size:9px;">' +
-          t.shares.toFixed(4) + ' sh @ $' + t.price.toFixed(2) +
-          (t.note ? ' &middot; ' + t.note : '') +
-        '</div>' +
-      '</div>' +
-      '<div style="text-align:right;font-weight:700;color:' + amtCol + ';">' + amtSign + m$txn(t.total) + '</div>' +
+  var all = HIST.concat(userConverted).sort(function(a,b){return b.date.localeCompare(a.date);});
+  var filtered = all.filter(function(t){
+    if(histFilter==='all')return true;
+    if(['buy','sell','div'].indexOf(histFilter)>=0)return t.type===histFilter;
+    return t.account===histFilter;
+  });
+  var buys=filtered.filter(function(t){return t.type==='buy';});
+  var sells=filtered.filter(function(t){return t.type==='sell';});
+  set('hs-count',filtered.length+' of '+all.length);
+  set('hs-invested','$'+Math.round(buys.reduce(function(s,t){return s+(t.net||t.total||0);},0)).toLocaleString());
+  set('hs-proceeds','$'+Math.round(sells.reduce(function(s,t){return s+(t.net||t.total||0);},0)).toLocaleString());
+  set('hist-meta',all.length+' trades · TD, Qtrade, Questrade, Wealthsimple');
+  var wrap=el('hist-list');
+  if(!wrap)return;
+  if(!filtered.length){wrap.innerHTML='<div class="txn-empty">No transactions yet</div>';return;}
+  wrap.innerHTML=filtered.map(function(t){
+    var tc=t.type==='buy'?'buy':t.type==='sell'?'sell':'div';
+    var tl=t.type==='buy'?'BUY':t.type==='sell'?'SELL':'DIV';
+    var ac=t.type==='sell'?'var(--red)':t.type==='div'?'var(--yellow)':'var(--green)';
+    var as=t.type==='sell'?'-':'+';
+    return '<div style="display:grid;grid-template-columns:80px 36px 1fr auto;gap:6px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:10px;">'+
+      '<div style="color:var(--muted);">'+t.date+'</div>'+
+      '<span class="txn-type '+tc+'">'+tl+'</span>'+
+      '<div><div style="font-weight:700;color:var(--text);">'+t.symbol+' <span style="color:var(--dim);font-size:8px;font-weight:400;">'+t.account+'</span></div>'+
+      '<div style="color:var(--muted);font-size:9px;">'+t.shares.toFixed(4)+' sh @ $'+t.price.toFixed(2)+(t.note?' \u00b7 '+t.note:'')+'</div></div>'+
+      '<div style="text-align:right;font-weight:700;color:'+ac+';">'+as+'$'+Math.abs(t.total).toFixed(2)+'</div>'+
     '</div>';
   }).join('');
 }
 
+// ── HELPERS ──────────────────────────────────────────────────
+function m$(n,d){d=d||0;return '$'+n.toLocaleString('en-CA',{minimumFractionDigits:d,maximumFractionDigits:d});}
+function pct(n){return(n>=0?'+':'')+n.toFixed(1)+'%';}
+function el(id){return document.getElementById(id);}
+function set(id,val,col){var e=el(id);if(!e)return;e.textContent=val;if(col)e.style.color=col;}
+function fmtK(v){return '$'+(v/1000).toFixed(0)+'k';}
 
 // ── SHARE COUNTS ─────────────────────────────────────────────
 var S = {
-  amitTFSA_VEQT:   3341.08964,  // +738.79+0.056 TD +278 Qtrade (May 28 switch)
-  amitTFSA_VFV:    4.840,        // residual Qtrade after selling 90 of 94.84
+  amitTFSA_VEQT:   3341.08964,
+  amitTFSA_VFV:    4.840,
   amitTFSA_CASH:   17.49,
-  trishaTFSA_VEQT: 1172.820,     // 885.60+0.22 TD +287 Qtrade (May 28 switch)
-  trishaTFSA_VFV:  4.998,        // residual Qtrade after selling 93 of 97.998
+  trishaTFSA_VEQT: 1172.820,
+  trishaTFSA_VFV:  4.998,
   trishaTFSA_CASH: 23.65,
   amitRRSP_VEQT:   1443.71,
   amitRRSP_CASH:   0.09,
   spousal_VEQT:    341.00,
   spousal_CASH:    50.54
 };
-// Benchmark shares (same $ same dates → pure ETF)
 var B = {
-  amitVEQT:    3284.3483,
-  amitVFV:     564.6798,
-  trishaVEQT:  1187.0005,
-  trishaVFV:   395.2304,
-  combVEQT:    3018.1818,
-  combVFV:     959.9102   // 564.6798 + 395.2304
+  amitVEQT:3284.3483, amitVFV:564.6798,
+  trishaVEQT:1187.0005, trishaVFV:395.2304,
+  combVEQT:3018.1818, combVFV:959.9102
 };
-var CONTRIB = { amit:60905, trisha:41499, comb:102404, rrsp:43521, spousal:8583, total:202603 };
+var CONTRIB = {amitTFSA:109000,amitRRSP:43521,trishaTFSA:41499,spousal:8583,total:202603};
+var VP=57.31, FP=173.81, VP_PREV=57.31, FP_PREV=173.81;
+var curSel='comb', chatHistory=[], chatOpen=false, hidden=false, histFilter='all', txnFilter='all';
+var TXN_KEY='portfolio_txns_v1';
 
-// ── STATIC ACCOUNT DATA ───────────────────────────────────────
-var ACCOUNTS = [
-  {
-    id:'comb', label:'All TFSAs', sub:'Amit + Trisha · all brokers',
-    color:'var(--blue)', colorHex:'#2563eb', dataColor:'blue',
-    period:'Apr 2018 → now', years:8,
-    contrib: CONTRIB.comb,
-    xirr:27.9, veqtXirr:15.96, vfvXirr:15.5,
-    verdict:'✅ Beats both', verdictColor:'var(--green)',
-    summary:'The combined TFSA crushed both VEQT and VFV by over $85k. Regular DCA into VEQT through 2021-2023 plus large lump sums at 2022 lows are the main drivers. ETF selection had almost no impact — contribution timing was everything.',
-    growthData:[
-      {p:"2019",a:100, v:100, f:100},
-      {p:"2020",a:100, v:100, f:100},
-      {p:"2021",a:283, v:223, f:194},
-      {p:"2022",a:404, v:367, f:331},
-      {p:"2023",a:1127,v:890, f:921},
-      {p:"2024",a:1640,v:1194,f:1294},
-      {p:"Now",  a:0,  v:0,  f:0}
-    ]
-  },
-  {
-    id:'amit', label:'Amit TFSA', sub:'TD (82BJR7-J) + Qtrade',
-    color:'var(--green)', colorHex:'#16a34a', dataColor:'green',
-    period:'Apr 2018 → now', years:8,
-    contrib: CONTRIB.amit,
-    xirr:27.94, veqtXirr:17.5, vfvXirr:16.8,
-    verdict:'🏆 Massive outperform', verdictColor:'var(--green)',
-    summary:"Amit beat a pure VEQT strategy by ~$3,133 and beat VFV by ~$93,212. The secret was bi-weekly DCA into VEQT through 2021–2023 when prices were rising, plus large lump sums at 2022 lows. The active contribution strategy outperformed passively buying and holding either benchmark.",
-    growthData:[
-      {p:"Dec'21",a:100,v:100,f:100},
-      {p:"Dec'22",a:177,v:190,f:174},
-      {p:"Dec'23",a:347,v:517,f:516},
-      {p:"Dec'24",a:431,v:707,f:682},
-      {p:"Now",   a:0,  v:0,  f:0}
-    ]
-  },
-  {
-    id:'trisha', label:'Trisha TFSA', sub:'TD (82BJR6-J) + Qtrade',
-    color:'var(--orange)', colorHex:'#ea6c00', dataColor:'orange',
-    period:'Jul 2023 → now', years:2.8,
-    contrib: CONTRIB.trisha,
-    xirr:18.7, veqtXirr:20.9, vfvXirr:23.2,
-    verdict:'⚠️ Slight underperform', verdictColor:'var(--yellow)',
-    summary:"Trisha trails VEQT slightly over her 2.8yr window. VFV actually won over this specific period — but VEQT has been outpacing VFV since late 2024 and that trend may continue. Switching VFV → VEQT now would capture that going forward at zero tax cost (TFSA).",
-    growthData:[
-      {p:"Jul'23",a:100,v:100,f:100},
-      {p:"Dec'23",a:105,v:105,f:119},
-      {p:"Dec'24",a:141,v:132,f:145},
-      {p:"Now",   a:0,  v:0,  f:0}
-    ]
-  }
-];
+function loadTxns(){try{return JSON.parse(localStorage.getItem(TXN_KEY)||'[]');}catch(e){return[];}}
+function saveTxns(arr){localStorage.setItem(TXN_KEY,JSON.stringify(arr));}
 
-// ── STATE ─────────────────────────────────────────────────────
-var curSel = 'comb';
-var VP = 57.31, FP = 173.81;  // live prices
-var VP_PREV = 57.31, FP_PREV = 173.81; // previous close
-
-// ── HELPERS ──────────────────────────────────────────────────
-function m$(n,d){ d=d||0; return '$'+n.toLocaleString('en-CA',{minimumFractionDigits:d,maximumFractionDigits:d}); }
-function pct(n){ return (n>=0?'+':'')+n.toFixed(1)+'%'; }
-function el(id){ return document.getElementById(id); }
-function set(id,val,col){ var e=el(id); if(!e)return; e.textContent=val; if(col)e.style.color=col; }
-function fmtK(v){ return '$'+Math.round(v/1000)+'k'; }
-
-// ── LIVE ACCOUNT CALCULATIONS ─────────────────────────────────
+// ── ACCOUNT CALCULATIONS ──────────────────────────────────────
 function calcAccounts(V,F){
-  var amitA   = S.amitTFSA_VEQT*V + S.amitTFSA_VFV*F + S.amitTFSA_CASH;
-  var trishaA = S.trishaTFSA_VEQT*V + S.trishaTFSA_VFV*F + S.trishaTFSA_CASH;
-  var combA   = amitA + trishaA;
-  var rrsp    = S.amitRRSP_VEQT*V + S.amitRRSP_CASH;
-  var spousal = S.spousal_VEQT*V;
-  var total   = combA + rrsp + spousal;
-
-  var amitVEQT   = B.amitVEQT*V;
-  var amitVFV    = B.amitVFV*F;
-  var trishaVEQT = B.trishaVEQT*V;
-  var trishaVFV  = B.trishaVFV*F;
-  var combVEQT   = B.combVEQT*V;
-  var combVFV    = B.combVFV*F;
-
-  return {
-    amitA:amitA, trishaA:trishaA, combA:combA,
-    rrsp:rrsp, spousal:spousal, total:total,
-    amitVEQT:amitVEQT, amitVFV:amitVFV,
-    trishaVEQT:trishaVEQT, trishaVFV:trishaVFV,
-    combVEQT:combVEQT, combVFV:combVFV
-  };
+  var amitA  = S.amitTFSA_VEQT*V + S.amitTFSA_VFV*F + S.amitTFSA_CASH;
+  var rrsp   = S.amitRRSP_VEQT*V + S.amitRRSP_CASH;
+  var trishaA= (S.trishaTFSA_VEQT||0)*V + S.trishaTFSA_VFV*F + S.trishaTFSA_CASH;
+  var spousal= S.spousal_VEQT*V + S.spousal_CASH;
+  var total  = amitA+rrsp+trishaA+spousal;
+  var amitVEQT=B.amitVEQT*V, amitVFV=B.amitVFV*F;
+  var trishaVEQT=B.trishaVEQT*V, trishaVFV=B.trishaVFV*F;
+  var combVEQT=B.combVEQT*V, combVFV=B.combVFV*F;
+  return {amitA:amitA,rrsp:rrsp,trishaA:trishaA,spousal:spousal,total:total,
+          amitVEQT:amitVEQT,amitVFV:amitVFV,trishaVEQT:trishaVEQT,trishaVFV:trishaVFV,
+          combVEQT:combVEQT,combVFV:combVFV};
 }
 
-// ── BUILD ACCOUNT SELECTOR ────────────────────────────────────
+// ── CHART.JS DEFAULTS ────────────────────────────────────────
+Chart.defaults.plugins.legend.display=false;
+var GRID='#e2e7f5';
+var TT={backgroundColor:'#fff',borderColor:GRID,borderWidth:1,titleColor:'#1a1d3a',bodyColor:'#6b7499',padding:10,cornerRadius:10,boxPadding:4};
+
+// ── ACCOUNT SELECTOR ─────────────────────────────────────────
+var ACCOUNTS=[
+  {id:'comb',label:'All TFSAs',sub:'Amit + Trisha',color:'var(--blue)',colorHex:'#2563eb',dataColor:'blue',period:'Apr 2018 \u2192 now',years:8,contrib:CONTRIB.amitTFSA+CONTRIB.trishaTFSA,xirr:27.9,veqtXirr:15.96,vfvXirr:15.5,verdict:'\u2705 Beats both',verdictColor:'var(--green)',
+    summary:'Combined TFSA beat VEQT benchmark by ~$85k. Regular DCA and large 2022 bear market buys drove outperformance. May 28 2026: switched all VFV to VEQT.',
+    growthData:[{p:"2019",a:100,v:100,f:100},{p:"2020",a:100,v:100,f:100},{p:"2021",a:283,v:223,f:194},{p:"2022",a:404,v:367,f:331},{p:"2023",a:1127,v:890,f:921},{p:"2024",a:1640,v:1194,f:1294},{p:"Now",a:0,v:0,f:0}]},
+  {id:'amit',label:'Amit TFSA',sub:'TD (82BJR7J) + Qtrade',color:'var(--green)',colorHex:'#16a34a',dataColor:'green',period:'Apr 2018 \u2192 now',years:8,contrib:CONTRIB.amitTFSA,xirr:27.94,veqtXirr:17.5,vfvXirr:16.8,verdict:'\uD83C\uDFC6 Massive outperform',verdictColor:'var(--green)',
+    summary:'Beat VEQT by ~$3,133 and VFV by ~$93,212. 2022 bear market buys drove outperformance. May 28 2026: sold all VFV, bought VEQT.',
+    growthData:[{p:"Dec'21",a:100,v:100,f:100},{p:"Dec'22",a:177,v:190,f:174},{p:"Dec'23",a:347,v:517,f:516},{p:"Dec'24",a:431,v:707,f:682},{p:"Now",a:0,v:0,f:0}]},
+  {id:'trisha',label:'Trisha TFSA',sub:'TD (82BJR6J) + Qtrade',color:'var(--orange)',colorHex:'#ea6c00',dataColor:'orange',period:'Jul 2023 \u2192 now',years:2.8,contrib:CONTRIB.trishaTFSA,xirr:18.7,veqtXirr:20.9,vfvXirr:23.2,verdict:'\u26A0\uFE0F Slight underperform',verdictColor:'var(--yellow)',
+    summary:'Trails VEQT slightly over 2.8yr window. May 28 2026: sold all VFV, bought VEQT. Now in VEQT going forward.',
+    growthData:[{p:"Jul'23",a:100,v:100,f:100},{p:"Dec'23",a:105,v:105,f:119},{p:"Dec'24",a:141,v:132,f:145},{p:"Now",a:0,v:0,f:0}]},
+];
+
 function buildSelector(){
-  var grid = el('acct-grid');
-  grid.innerHTML = '';
+  var grid=el('acct-grid');
+  if(!grid)return;
+  grid.innerHTML='';
   ACCOUNTS.forEach(function(a){
-    var btn = document.createElement('button');
-    btn.className = 'acct-btn' + (a.id===curSel?' active':'');
-    btn.setAttribute('data-color', a.dataColor);
-    btn.setAttribute('data-id', a.id);
-    btn.onclick = function(){
-      curSel = a.id;
-      buildSelector();
-      buildMain();
-      // Map selector IDs to growth chart IDs
-      var growthId = a.id === 'comb' ? 'comb' : a.id === 'amit' ? 'amit' : 'trisha';
-      buildAcctGrowthChart(growthId);
-    };
-    btn.innerHTML =
-      '<div class="ab-label" style="color:'+a.color+'">'+a.label+'</div>'+
+    var btn=document.createElement('button');
+    btn.className='acct-btn'+(a.id===curSel?' active':'');
+    btn.setAttribute('data-color',a.dataColor);
+    btn.onclick=function(){curSel=a.id;buildSelector();buildMain();buildAcctGrowthChart(a.id==='comb'?'comb':a.id==='amit'?'amit':'trisha');};
+    btn.innerHTML='<div class="ab-label" style="color:'+a.color+'">'+a.label+'</div>'+
       '<div class="ab-period">'+a.years+'yr period</div>'+
       '<div class="ab-xirr up">+'+a.xirr.toFixed(1)+'%</div>'+
       '<div class="ab-xirr-lbl">actual XIRR/yr</div>'+
@@ -955,364 +864,128 @@ function buildSelector(){
   });
 }
 
-// ── CHART INSTANCES ───────────────────────────────────────────
-var barChart=null, xirrChart=null, growthChart=null, totalLineChart=null;
-Chart.defaults.plugins.legend.display = false;
-var GRID='#e2e7f5';
-var TT={backgroundColor:'#ffffff',borderColor:'#e2e7f5',borderWidth:1,titleColor:'#1a1d3a',bodyColor:'#6b7499',padding:10,cornerRadius:8,boxPadding:3};
-
-function buildBarChart(canvasId, data){
-  var ctx = el(canvasId); if(!ctx)return null;
-  var ex = Chart.getChart(ctx); if(ex)ex.destroy();
-  return new Chart(ctx.getContext('2d'),{
-    type:'bar',
-    data:{
-      labels:['Actual','VEQT only','VFV only'],
-      datasets:[{
-        data:[data.actual, data.veqt, data.vfv],
-        backgroundColor:['#16a34a','#7c3aed','#ea6c00'],
-        borderRadius:4, borderSkipped:false
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{display:false},
-        tooltip:{...TT, callbacks:{label:function(c){return ' '+m$(c.parsed.y);}}}
-      },
-      scales:{
-        x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:10,family:'IBM Plex Mono'}}},
-        y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return fmtK(v);}}}
-      }
-    }
-  });
+function buildBarChart(canvasId,data){
+  var ctx=el(canvasId);var ex=Chart.getChart(ctx);if(ex)ex.destroy();
+  return new Chart(ctx.getContext('2d'),{type:'bar',data:{labels:['Actual','VEQT only','VFV only'],datasets:[{data:[data.actual,data.veqt,data.vfv],backgroundColor:['#16a34a','#7c3aed','#ea6c00'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:function(c){return' '+m$(c.parsed.y);}}}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:10}}},y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return fmtK(v);}}}}}});
 }
-
-function buildXirrChart(canvasId, data){
-  var ctx = el(canvasId); if(!ctx)return null;
-  var ex = Chart.getChart(ctx); if(ex)ex.destroy();
-  return new Chart(ctx.getContext('2d'),{
-    type:'bar',
-    data:{
-      labels:['Actual','VEQT only','VFV only'],
-      datasets:[{
-        data:[data.xirr, data.veqtXirr, data.vfvXirr],
-        backgroundColor:['#16a34a','#7c3aed','#ea6c00'],
-        borderRadius:4, borderSkipped:false
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{
-        legend:{display:false},
-        tooltip:{...TT, callbacks:{label:function(c){return ' '+c.parsed.y.toFixed(1)+'%';}}}
-      },
-      scales:{
-        x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:10,family:'IBM Plex Mono'}}},
-        y:{
-          grid:{color:GRID},
-          ticks:{color:'#6b7499',font:{size:9},callback:function(v){return v+'%';}},
-          min:0, max:35
-        }
-      }
-    }
-  });
+function buildXirrChart(canvasId,data){
+  var ctx=el(canvasId);var ex=Chart.getChart(ctx);if(ex)ex.destroy();
+  return new Chart(ctx.getContext('2d'),{type:'bar',data:{labels:['Actual','VEQT only','VFV only'],datasets:[{data:[data.xirr,data.veqtXirr,data.vfvXirr],backgroundColor:['#16a34a','#7c3aed','#ea6c00'],borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:function(c){return' '+c.parsed.y.toFixed(1)+'%';}}}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:10}}},y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return v+'%';}},min:0,max:35}}}});
 }
-
-function buildGrowthChart(canvasId, growthData, accentColor){
-  var ctx = el(canvasId); if(!ctx) return null;
-  var ex = Chart.getChart(ctx); if(ex) ex.destroy();
-  return new Chart(ctx.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: growthData.map(function(d){ return d.p; }),
-      datasets: [
-        {
-          label: 'Actual',
-          data: growthData.map(function(d){ return d.a; }),
-          borderColor: '#3fb950',
-          backgroundColor: 'rgba(63,185,80,.08)',
-          borderWidth: 3,
-          fill: true,
-          pointRadius: 5,
-          pointBackgroundColor: '#3fb950',
-          pointBorderColor: '#0d1117',
-          pointBorderWidth: 2,
-          tension: .4,
-          order: 1
-        },
-        {
-          label: 'VEQT only',
-          data: growthData.map(function(d){ return d.v; }),
-          borderColor: '#bc8cff',
-          backgroundColor: 'rgba(188,140,255,.05)',
-          borderWidth: 2,
-          borderDash: [6, 3],
-          fill: false,
-          pointRadius: 4,
-          pointBackgroundColor: '#bc8cff',
-          pointBorderColor: '#0d1117',
-          pointBorderWidth: 2,
-          tension: .4,
-          order: 2
-        },
-        {
-          label: 'VFV only',
-          data: growthData.map(function(d){ return d.f; }),
-          borderColor: '#f0883e',
-          backgroundColor: 'rgba(240,136,62,.05)',
-          borderWidth: 2,
-          borderDash: [2, 4],
-          fill: false,
-          pointRadius: 4,
-          pointBackgroundColor: '#f0883e',
-          pointBorderColor: '#0d1117',
-          pointBorderWidth: 2,
-          tension: .4,
-          order: 3
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: {mode: 'index', intersect: false},
-      plugins: {
-        legend: {
-          display: true,
-          labels: {
-            color: '#7d8590',
-            font: {size: 9, family: 'IBM Plex Mono'},
-            boxWidth: 10,
-            usePointStyle: true,
-            pointStyle: 'circle'
-          }
-        },
-        tooltip: {
-          ...TT,
-          callbacks: {
-            label: function(c) {
-              return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(0);
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: {color: GRID},
-          ticks: {color: '#7d8590', font: {size: 9}}
-        },
-        y: {
-          grid: {color: GRID},
-          ticks: {
-            color: '#7d8590',
-            font: {size: 9},
-            callback: function(v){ return v; }
-          }
-        }
-      }
-    }
-  });
+function buildGrowthChart(canvasId,growthData,accentColor){
+  var ctx=el(canvasId);var ex=Chart.getChart(ctx);if(ex)ex.destroy();
+  return new Chart(ctx.getContext('2d'),{type:'line',data:{labels:growthData.map(function(d){return d.p;}),datasets:[{label:'Actual',data:growthData.map(function(d){return d.a;}),borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,.08)',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:'#16a34a',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'VEQT only',data:growthData.map(function(d){return d.v;}),borderColor:'#7c3aed',backgroundColor:'transparent',borderWidth:2,borderDash:[6,3],fill:false,pointRadius:4,pointBackgroundColor:'#7c3aed',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:2},{label:'VFV only',data:growthData.map(function(d){return d.f;}),borderColor:'#ea6c00',backgroundColor:'transparent',borderWidth:2,borderDash:[2,4],fill:false,pointRadius:4,pointBackgroundColor:'#ea6c00',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:3}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+c.parsed.y.toFixed(0);}}}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return v;}}}}}});
 }
-
 
 function buildMain(){
-  var c = calcAccounts(VP,FP);
-  var a = ACCOUNTS.find(function(x){return x.id===curSel;});
-
-  var actual, veqt, vfv;
-  if(a.id==='comb'){   actual=c.combA;   veqt=c.combVEQT;   vfv=c.combVFV;   }
-  else if(a.id==='amit'){actual=c.amitA;  veqt=c.amitVEQT;   vfv=c.amitVFV;   }
-  else{                  actual=c.trishaA;veqt=c.trishaVEQT; vfv=c.trishaVFV; }
-
-  var vsVEQT = actual-veqt, vsVFV = actual-vfv;
-  var gain   = actual-a.contrib;
-
-  // Update growth data last point — indexed to 100 at start
-  var gd = JSON.parse(JSON.stringify(a.growthData));
-  // Find the base value (first data point actual value in dollars)
-  var baseActual, baseVEQT, baseVFV;
-  if (a.id === 'amit') {
-    // Base = Dec 2021 actual values
-    baseActual = 29670; baseVEQT = 18465; baseVFV = 10858;
-    gd[gd.length-1] = {
-      p:'Now',
-      a: Math.round(actual / baseActual * 100),
-      v: Math.round(veqt  / baseActual * 100),
-      f: Math.round(vfv   / baseActual * 100)
-    };
-  } else if (a.id === 'trisha') {
-    baseActual = 41499;
-    gd[gd.length-1] = {
-      p:'Now',
-      a: Math.round(actual / baseActual * 100),
-      v: Math.round(veqt  / baseActual * 100),
-      f: Math.round(vfv   / baseActual * 100)
-    };
-  } else {
-    // Combined — use actual/veqt/vfv already set at top of buildMain
-    baseActual = 10410;
-    gd[gd.length-1] = {
-      p:'Now',
-      a: Math.round(actual / baseActual * 100),
-      v: Math.round(veqt   / baseActual * 100),
-      f: Math.round(vfv    / baseActual * 100)
-    };
-  }
-
-  var vsVeqtStr = (vsVEQT>=0?'+':'')+m$(vsVEQT);
-  var vsVfvStr  = (vsVFV>=0?'+':'')+m$(vsVFV);
-  var vsVeqtPp  = (a.xirr-a.veqtXirr>=0?'+':'')+(a.xirr-a.veqtXirr).toFixed(1)+'pp';
-  var vsVfvPp   = (a.xirr-a.vfvXirr>=0?'+':'')+(a.xirr-a.vfvXirr).toFixed(1)+'pp';
-  var posVeqt   = vsVEQT>=0;
-  var posVfv    = vsVFV>=0;
-
-  el('main-content').innerHTML =
-    // ── VALUE BARS ──
-    '<div class="sec">Portfolio Value — Actual vs If 100% VEQT vs If 100% VFV</div>'+
-    '<div class="sec-sub">Same '+m$(a.contrib)+' invested · same dates · only the ETF changes</div>'+
+  var c=calcAccounts(VP,FP);
+  var a=ACCOUNTS.find(function(x){return x.id===curSel;});
+  var actual,veqt,vfv;
+  if(a.id==='comb'){actual=c.amitA+c.trishaA;veqt=c.combVEQT;vfv=c.combVFV;}
+  else if(a.id==='amit'){actual=c.amitA;veqt=c.amitVEQT;vfv=c.amitVFV;}
+  else{actual=c.trishaA;veqt=c.trishaVEQT;vfv=c.trishaVFV;}
+  var vsVEQT=actual-veqt,vsVFV=actual-vfv;
+  var gain=actual-a.contrib;
+  var gd=JSON.parse(JSON.stringify(a.growthData));
+  if(a.id==='amit'){var ba=29670;gd[gd.length-1]={p:'Now',a:Math.round(actual/ba*100),v:Math.round(veqt/ba*100),f:Math.round(vfv/ba*100)};}
+  else if(a.id==='trisha'){var bt=41499;gd[gd.length-1]={p:'Now',a:Math.round(actual/bt*100),v:Math.round(veqt/bt*100),f:Math.round(vfv/bt*100)};}
+  else{var bc=10410;gd[gd.length-1]={p:'Now',a:Math.round((c.amitA+c.trishaA)/bc*100),v:Math.round(c.combVEQT/bc*100),f:Math.round(c.combVFV/bc*100)};}
+  var vsVeqtStr=(vsVEQT>=0?'+':'')+m$(vsVEQT);
+  var vsVfvStr=(vsVFV>=0?'+':'')+m$(vsVFV);
+  var posVeqt=vsVEQT>=0,posVfv=vsVFV>=0;
+  el('main-content').innerHTML=
+    '<div class="sec">Portfolio Value \u2014 Actual vs VEQT vs VFV</div>'+
+    '<div class="sec-sub">Same '+m$(a.contrib)+' invested \u00b7 same dates \u00b7 only ETF changes</div>'+
     '<div class="chart-wrap"><canvas id="bar-chart" height="190"></canvas></div>'+
-
-    // ── DIFF CALLOUTS ──
     '<div class="diff-grid">'+
-      '<div class="diff-box" style="border-left:3px solid '+(posVeqt?'var(--green)':'var(--red)')+'">'+
-        '<div class="diff-lbl">Actual vs VEQT-only</div>'+
-        '<div class="diff-val" style="color:'+(posVeqt?'var(--green)':'var(--red)')+'">'+vsVeqtStr+'</div>'+
-        '<div class="diff-pp" style="color:'+(posVeqt?'var(--green)':'var(--red)')+'">'+vsVeqtPp+' per year</div>'+
-      '</div>'+
-      '<div class="diff-box" style="border-left:3px solid '+(posVfv?'var(--green)':'var(--red)')+'">'+
-        '<div class="diff-lbl">Actual vs VFV-only</div>'+
-        '<div class="diff-val" style="color:'+(posVfv?'var(--green)':'var(--red)')+'">'+vsVfvStr+'</div>'+
-        '<div class="diff-pp" style="color:'+(posVfv?'var(--green)':'var(--red)')+'">'+vsVfvPp+' per year</div>'+
-      '</div>'+
+      '<div class="diff-box" style="border-left:3px solid '+(posVeqt?'var(--green)':'var(--red)')+'"><div class="diff-lbl">Actual vs VEQT</div><div class="diff-val" style="color:'+(posVeqt?'var(--green)':'var(--red)')+'">'+vsVeqtStr+'</div><div class="diff-pp" style="color:'+(posVeqt?'var(--green)':'var(--red)')+'">'+(a.xirr-a.veqtXirr>=0?'+':'')+(a.xirr-a.veqtXirr).toFixed(1)+'pp/yr</div></div>'+
+      '<div class="diff-box" style="border-left:3px solid '+(posVfv?'var(--green)':'var(--red)')+'"><div class="diff-lbl">Actual vs VFV</div><div class="diff-val" style="color:'+(posVfv?'var(--green)':'var(--red)')+'">'+vsVfvStr+'</div><div class="diff-pp" style="color:'+(posVfv?'var(--green)':'var(--red)')+'">'+(a.xirr-a.vfvXirr>=0?'+':'')+(a.xirr-a.vfvXirr).toFixed(1)+'pp/yr</div></div>'+
     '</div>'+
-
-    // ── XIRR BARS ──
-    '<div class="sec">XIRR Comparison — %/yr</div>'+
+    '<div class="sec">XIRR Comparison</div>'+
     '<div class="chart-wrap"><canvas id="xirr-chart" height="160"></canvas></div>'+
-
-    // ── GROWTH LINE ──
-    (a.id!=='comb'?
-      '<div class="sec">Indexed Growth (start=100) — Actual vs VEQT vs VFV</div>'+
-      '<div class="chart-wrap"><canvas id="growth-chart" height="180"></canvas></div>'
-    :'')+
-
-    // ── SUMMARY CARD ──
+    (a.id!=='comb'?'<div class="sec">Indexed Growth (start=100)</div><div class="chart-wrap"><canvas id="growth-chart" height="180"></canvas></div>':'')+
     '<div class="summary-card" style="border:2px solid '+a.verdictColor+'44">'+
-      '<div class="summary-header">'+
-        '<div class="summary-name" style="color:'+a.color+'">'+a.label+'</div>'+
-        '<div class="verdict-badge" style="color:'+a.verdictColor+';background:'+a.verdictColor+'22;border:1px solid '+a.verdictColor+'">'+a.verdict+'</div>'+
-      '</div>'+
+      '<div class="summary-header"><div class="summary-name" style="color:'+a.color+'">'+a.label+'</div>'+
+      '<div class="verdict-badge" style="color:'+a.verdictColor+';background:'+a.verdictColor+'22;border:1px solid '+a.verdictColor+'">'+a.verdict+'</div></div>'+
       '<div class="score-grid">'+
         '<div class="score-box"><div class="score-lbl">Invested</div><div class="score-val" style="color:var(--muted)">'+m$(a.contrib)+'</div></div>'+
         '<div class="score-box"><div class="score-lbl">Actual Value</div><div class="score-val" style="color:'+a.color+'">'+m$(Math.round(actual))+'</div></div>'+
-        '<div class="score-box"><div class="score-lbl">Gain</div><div class="score-val up">+'+(((actual/a.contrib)-1)*100).toFixed(1)+'%</div></div>'+
-        '<div class="score-box"><div class="score-lbl">Actual XIRR</div><div class="score-val up">+'+a.xirr.toFixed(1)+'% /yr</div></div>'+
-        '<div class="score-box"><div class="score-lbl">VEQT XIRR</div><div class="score-val" style="color:var(--purple)">+'+a.veqtXirr.toFixed(1)+'% /yr</div></div>'+
-        '<div class="score-box"><div class="score-lbl">VFV XIRR</div><div class="score-val" style="color:var(--orange)">+'+a.vfvXirr.toFixed(1)+'% /yr</div></div>'+
+        '<div class="score-box"><div class="score-val up">+'+(((actual/a.contrib)-1)*100).toFixed(1)+'%</div><div class="score-lbl">Gain</div></div>'+
+        '<div class="score-box"><div class="score-val up">+'+a.xirr.toFixed(1)+'%/yr</div><div class="score-lbl">Actual XIRR</div></div>'+
+        '<div class="score-box"><div class="score-val" style="color:var(--purple)">+'+a.veqtXirr.toFixed(1)+'%/yr</div><div class="score-lbl">VEQT XIRR</div></div>'+
+        '<div class="score-box"><div class="score-val" style="color:var(--orange)">+'+a.vfvXirr.toFixed(1)+'%/yr</div><div class="score-lbl">VFV XIRR</div></div>'+
       '</div>'+
       '<div class="summary-text">'+a.summary+'</div>'+
     '</div>'+
-
-    // ── INSIGHT ──
-    '<div class="insight">'+
-      '<div class="insight-title">💡 The Key Insight</div>'+
-      '<div class="insight-text">'+
-        '<b style="color:var(--text)">Amit beat VEQT by ~$3,133</b> and beat VFV by <b style="color:var(--text)">~$93,212</b> — not by picking better stocks, but by making <b style="color:var(--green)">regular contributions during a bull run</b>. DCA into VEQT through 2021-2023 while prices rose meant each new purchase compounded more.<br><br>'+
-        '<b style="color:var(--text)">Trisha trailed VEQT by ~$1,039</b> over 2.8 years. VFV actually beat VEQT over her full window (Jul 2023→now) — but <b style="color:var(--orange)">VEQT has been outpacing VFV since late 2024</b>. Switching VFV → VEQT now costs nothing (TFSA, no capital gains).'+
-      '</div>'+
-    '</div>';
-
-  // Build charts
-  buildBarChart('bar-chart', {actual:actual, veqt:veqt, vfv:vfv, color:a.colorHex});
-  buildXirrChart('xirr-chart', a);
-  if(a.id!=='comb') buildGrowthChart('growth-chart', gd, a.colorHex);
+    '<div class="insight"><div class="insight-title">\uD83D\uDCA1 The Key Insight</div>'+
+    '<div class="insight-text"><b style="color:var(--text)">Amit beat VEQT by ~$3,133</b> — not by picking better stocks but by DCA into VEQT through 2021-2023 and large bear market buys in 2022.<br><br>'+
+    '<b style="color:var(--text)">Trisha trailed VEQT slightly</b> over her 2.8yr window. Both switched all VFV to VEQT on May 28 2026. VEQT has outperformed VFV since late 2024.</div></div>';
+  buildBarChart('bar-chart',{actual:actual,veqt:veqt,vfv:vfv,color:a.colorHex});
+  buildXirrChart('xirr-chart',a);
+  if(a.id!=='comb')buildGrowthChart('growth-chart',gd,a.colorHex);
+  if(hidden)document.querySelectorAll('.private').forEach(function(e){e.classList.add('hidden-val');});
 }
 
-// ── TOTAL PORTFOLIO CHART ─────────────────────────────────────
+// ── TOTAL LINE CHART ──────────────────────────────────────────
 function buildTotalLine(){
-  var ctx = el('total-line-chart'); if(!ctx)return;
-  var ex = Chart.getChart(ctx); if(ex)ex.destroy();
-  var c = calcAccounts(VP,FP);
-  var portData = [9253,9253,9253,52400,93300,186400,258500,Math.round(c.total)];
-  var contribData = [9017,9017,9017,68796,85271,133333,140333,202603];
-  totalLineChart = new Chart(ctx.getContext('2d'),{
-    type:'line',
-    data:{
-      labels:['2018','2019','2020','2021','2022','2023','2024','Now'],
-      datasets:[
-        {
-          label:'Portfolio Value',
-          data:portData,
-          borderColor:'#2563eb',
-          backgroundColor:'rgba(37,99,235,.08)',
-          borderWidth:3, fill:true,
-          pointRadius:5, pointBackgroundColor:'#2563eb',
-          pointBorderColor:'#ffffff', pointBorderWidth:2, tension:.4, order:1
-        },
-        {
-          label:'Contributed',
-          data:contribData,
-          borderColor:'#b45309',
-          backgroundColor:'transparent',
-          borderWidth:2, borderDash:[5,4], fill:false,
-          pointRadius:3, pointBackgroundColor:'#b45309',
-          pointBorderColor:'#ffffff', pointBorderWidth:2, tension:.3, order:2
-        }
-      ]
-    },
-    options:{
-      responsive:true,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:true,labels:{color:'#6b7499',font:{size:9,family:'IBM Plex Mono'},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},
-        tooltip:{
-          ...TT,
-          callbacks:{
-            label:function(c){ return ' '+c.dataset.label+': '+m$(c.parsed.y); },
-            afterLabel:function(c){
-              if(c.datasetIndex===0){
-                var g=c.parsed.y-contribData[c.dataIndex];
-                return ' Gain: '+(g>=0?'+':'')+m$(g);
-              }
-              return '';
-            }
-          }
-        }
-      },
-      scales:{
-        x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},
-        y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return fmtK(v);}}}
-      }
-    }
-  });
+  var ctx=el('total-line-chart');if(!ctx)return;
+  var ex=Chart.getChart(ctx);if(ex)ex.destroy();
+  var c=calcAccounts(VP,FP);
+  var portData=[9253,9253,9253,52400,93300,186400,258500,304000,Math.round(c.total)];
+  var contribData=[9017,9017,9017,68796,85271,133333,140333,147333,202603];
+  new Chart(ctx.getContext('2d'),{type:'line',data:{labels:['2018','2019','2020','2021','2022','2023','2024','2025','Now'],datasets:[{label:'Portfolio Value',data:portData,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:contribData,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-contribData[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';}}}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return fmtK(v);}}}}}});
+}
+
+// ── PER-ACCOUNT GROWTH CHART ──────────────────────────────────
+var ACCT_GROWTH={
+  'comb':{title:'Combined TFSAs',color:'#6366f1',labels:['2019','2020','2021','2022','2023','2024','Now'],actual:[10200,11800,29500,42100,117400,171000,0],contrib:[9017,9017,16692,33167,81229,88229,102429]},
+  'amit':{title:"Amit's TFSA",color:'#16a34a',labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[29670,52635,102980,127955,0],contrib:[16692,33167,59167,65167,109000]},
+  'trisha':{title:"Trisha's TFSA",color:'#ea6c00',labels:["Jul'23","Dec'23","Dec'24","Now"],actual:[41499,43563,58610,0],contrib:[41499,41499,41499,41499]},
+  'rrsp':{title:"Amit's RRSP",color:'#2563eb',labels:["Aug'22","Dec'22","Dec'23","Dec'24","Now"],actual:[12193,34000,48500,72000,0],contrib:[16692,35000,43521,43521,43521]},
+  'spousal':{title:"Spousal RRSP",color:'#7c3aed',labels:['2021','2022','2023','2024','Now'],actual:[8583,9200,11000,15500,0],contrib:[8583,8583,8583,8583,8583]},
+};
+var acctGrowthChart=null;
+function buildAcctGrowthChart(id){
+  var c=calcAccounts(VP,FP);
+  var gd=ACCT_GROWTH[id];if(!gd)return;
+  var lv={'comb':c.amitA+c.trishaA,'amit':c.amitA,'trisha':c.trishaA,'rrsp':c.rrsp,'spousal':c.spousal}[id]||0;
+  var actualData=gd.actual.slice();actualData[actualData.length-1]=Math.round(lv);
+  var titleEl=el('acct-growth-title'),subEl=el('acct-growth-sub');
+  if(titleEl)titleEl.textContent=gd.title+' \u25CF';
+  if(subEl)subEl.textContent='Value: '+m$(Math.round(lv))+'  \u00b7  Live';
+  var ctx=el('acct-growth-chart');if(!ctx)return;
+  if(acctGrowthChart)acctGrowthChart.destroy();
+  acctGrowthChart=new Chart(ctx.getContext('2d'),{type:'line',data:{labels:gd.labels,datasets:[{label:'Portfolio Value',data:actualData,borderColor:gd.color,backgroundColor:gd.color+'18',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:gd.color,pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:gd.contrib,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-gd.contrib[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';} }}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return fmtK(v);}}}}  }});
 }
 
 // ── ACCOUNT TILES ─────────────────────────────────────────────
 function buildAccountTiles(){
-  var c = calcAccounts(VP,FP);
-  var tiles = [
-    {name:"Amit TFSA",  val:c.amitA,   contrib:CONTRIB.amit,   color:'var(--green)',  xirr:'27.94%'},
-    {name:"Amit RRSP",  val:c.rrsp,    contrib:CONTRIB.rrsp,   color:'var(--blue)',   xirr:'~14.2%'},
-    {name:"Trisha TFSA",val:c.trishaA, contrib:CONTRIB.trisha, color:'var(--orange)', xirr:'~18.7%'},
-    {name:"Spousal",    val:c.spousal, contrib:CONTRIB.spousal, color:'var(--purple)', xirr:'+136.75%'}
+  var c=calcAccounts(VP,FP);
+  var tiles=[
+    {name:'Amit TFSA',val:c.amitA,contrib:CONTRIB.amitTFSA,color:'var(--green)',xirr:'27.94%'},
+    {name:'Amit RRSP',val:c.rrsp,contrib:CONTRIB.amitRRSP,color:'var(--blue)',xirr:'~14.2%'},
+    {name:'Trisha TFSA',val:c.trishaA,contrib:CONTRIB.trishaTFSA,color:'var(--orange)',xirr:'~18.7%'},
+    {name:'Spousal RRSP',val:c.spousal,contrib:CONTRIB.spousal,color:'var(--purple)',xirr:'+136.75%'}
   ];
-  var wrap = el('account-tiles');
-  wrap.innerHTML = tiles.map(function(t){
+  var wrap=el('account-tiles');if(!wrap)return;
+  var acctToChart = {'Amit TFSA':'amit','Amit RRSP':'rrsp','Trisha TFSA':'trisha','Spousal RRSP':'spousal'};
+  wrap.innerHTML=tiles.map(function(t){
     var g=t.val-t.contrib, gp=((t.val/t.contrib-1)*100).toFixed(1);
-    return '<div class="th-stat">'+
+    var chartId = acctToChart[t.name] || 'amit';
+    return '<div class="th-stat" style="cursor:pointer;" data-chart="'+chartId+'" onclick="onAccountTileTap(this.dataset.chart)" title="Tap to see growth chart">'+
       '<div class="th-stat-lbl" style="color:'+t.color+'">'+t.name+'</div>'+
       '<div class="th-stat-val">'+m$(Math.round(t.val))+'</div>'+
-      '<div style="font-size:9px;color:'+(g>=0?'var(--green)':'var(--red)')+'">+'+(g>=0?m$(Math.round(g)):'-')+'  (+'+gp+'%)</div>'+
-      '<div style="font-size:8px;color:var(--dim);margin-top:2px">XIRR: '+t.xirr+'</div>'+
+      '<div style="font-size:9px;color:'+(g>=0?'var(--green)':'var(--red)')+';">'+(g>=0?'+':'')+m$(Math.round(g))+'  ('+(g>=0?'+':'')+gp+'%)</div>'+
+      '<div style="font-size:8px;color:var(--dim);margin-top:2px;">XIRR: '+t.xirr+' &nbsp;↗ chart</div>'+
     '</div>';
   }).join('');
 }
 
 // ── BOTTOM TABLE ──────────────────────────────────────────────
 function buildTable(){
-  var rows = el('btbl-rows');
-  rows.innerHTML = ACCOUNTS.map(function(a){
-    return '<div class="btbl-row '+(curSel===a.id?'active':'')+ '" onclick="curSel=\''+a.id+'\';buildSelector();buildMain();">'+
+  var rows=el('btbl-rows');if(!rows)return;
+  rows.innerHTML=ACCOUNTS.map(function(a){
+    return '<div class="btbl-row'+(curSel===a.id?' active':'')+'" onclick="curSel=\''+a.id+'\';buildSelector();buildMain();">'+
       '<div><div class="btbl-name" style="color:'+a.color+'">'+a.label+'</div><div class="btbl-period">'+a.period+'</div></div>'+
       '<div class="btbl-val up">+'+a.xirr.toFixed(1)+'%</div>'+
       '<div class="btbl-val" style="color:var(--purple)">+'+a.veqtXirr.toFixed(1)+'%</div>'+
@@ -1321,450 +994,331 @@ function buildTable(){
   }).join('');
 }
 
-// ── UPDATE ALL LIVE VALUES ────────────────────────────────────
+// ── UPDATE LIVE VALUES ────────────────────────────────────────
 function updateLiveValues(){
-  var c = calcAccounts(VP,FP);
-  var gain = c.total - CONTRIB.total;
-  set('tp-total', m$(Math.round(c.total)));
-  set('tp-gain',  (gain>=0?'+':'')+m$(Math.round(gain))+' ('+(((c.total/CONTRIB.total)-1)*100).toFixed(1)+'%)', gain>=0?'var(--green)':'var(--red)');
-  set('tp-mult',  (c.total/CONTRIB.total).toFixed(2)+'\u00d7');
-  set('tp-sub',   'Live · Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+  var c=calcAccounts(VP,FP);
+  var total=c.total,gain=total-CONTRIB.total;
+  set('tp-total',m$(Math.round(total)));
+  set('tp-gain',(gain>=0?'+':'')+m$(Math.round(gain))+' ('+(((total/CONTRIB.total)-1)*100).toFixed(1)+'%)', gain>=0?'#4ade80':'#f87171');
+  // tp-mult removed
+  set('tp-sub','Live \u00b7 Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+  set('last-updated','Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+
+  // Hero VEQT tile
+  if(VP){
+    var veqtCh=VP-VP_PREV, veqtUp=veqtCh>=0;
+    set('veqt-hero-p',m$(VP,2),'#ffffff');
+    set('veqt-hero-c',(veqtUp?'+':'')+veqtCh.toFixed(2)+' ('+(veqtUp?'+':'')+((veqtCh/VP_PREV)*100).toFixed(2)+'%)',veqtUp?'#4ade80':'#f87171');
+  }
 
   // Daily P&L
-  var totalVEQT = S.amitTFSA_VEQT + (S.trishaTFSA_VEQT||0) + S.amitRRSP_VEQT + S.spousal_VEQT;
-  var totalVFV  = S.amitTFSA_VFV  + S.trishaTFSA_VFV;
-  var dailyPL   = (totalVEQT * (VP - VP_PREV)) + (totalVFV * (FP - FP_PREV));
-  var dailyPct  = (c.total - dailyPL) > 0 ? (dailyPL / (c.total - dailyPL) * 100) : 0;
-  var dEl = document.getElementById('tp-daily');
-  var dSub = document.getElementById('tp-daily-sub');
-  if(dEl){
-    dEl.textContent = (dailyPL>=0?'+':'')+m$(Math.round(dailyPL));
-    dEl.style.color = dailyPL>=0?'#16a34a':'#dc2626';
-  }
-  if(dSub){
-    var veqtChg = VP - VP_PREV;
-    var vfvChg  = FP - FP_PREV;
-    dSub.textContent = (dailyPct>=0?'+':'')+dailyPct.toFixed(2)+'% · VEQT '+(veqtChg>=0?'+':'')+veqtChg.toFixed(2)+' VFV '+(vfvChg>=0?'+':'')+vfvChg.toFixed(2);
-  }
+  var totalVEQT=S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT;
+  var totalVFV=S.amitTFSA_VFV+S.trishaTFSA_VFV;
+  var dailyPL=(totalVEQT*(VP-VP_PREV))+(totalVFV*(FP-FP_PREV));
+  var dailyPct=(c.total-dailyPL)>0?(dailyPL/(c.total-dailyPL)*100):0;
+  var dEl=el('tp-daily'),dPct=el('tp-daily-pct'),dSub=el('tp-daily-sub');
+  if(dEl){dEl.textContent=(dailyPL>=0?'+':'')+m$(Math.round(dailyPL));dEl.style.color=dailyPL>=0?'#4ade80':'#f87171';}
+  if(dPct){dPct.textContent=(dailyPct>=0?'+':'')+dailyPct.toFixed(2)+'%';dPct.style.color=dailyPL>=0?'#4ade80':'#f87171';}
+  if(dSub)dSub.textContent='Today';
 
+  // Account tiles
+  var accs=[
+    ['s-amit-tfsa','sg-amit-tfsa',c.amitA,CONTRIB.amitTFSA,'ac-amit-tfsa','acg-amit-tfsa'],
+    ['s-amit-rrsp','sg-amit-rrsp',c.rrsp,CONTRIB.amitRRSP,'ac-amit-rrsp','acg-amit-rrsp'],
+    ['s-trisha-tfsa','sg-trisha-tfsa',c.trishaA,CONTRIB.trishaTFSA,'ac-trisha-tfsa','acg-trisha-tfsa'],
+    ['s-spousal','sg-spousal',c.spousal,CONTRIB.spousal,'ac-spousal','acg-spousal'],
+  ];
+  accs.forEach(function(a){
+    var g=a[2]-a[3],pct=((g/a[3])*100).toFixed(1),gc=g>=0?'#16a34a':'#dc2626';
+    set(a[0],m$(a[2]));set(a[1],(g>=0?'+':'')+m$(g)+' ('+pct+'%)',gc);
+    set(a[4],m$(a[2]));set(a[5],(g>=0?'+':'')+m$(g)+' \u00b7 '+(g>=0?'+':'')+pct+'%',gc);
+  });
+
+  // Charts
   buildTotalLine();
   buildAccountTiles();
   buildMain();
   buildTable();
-  // Refresh whichever account chart is showing
-  var growthId = curSel === 'comb' ? 'comb' : curSel === 'amit' ? 'amit' : 'trisha';
+  var growthId=curSel==='comb'?'comb':curSel==='amit'?'amit':'trisha';
   buildAcctGrowthChart(growthId);
+  if(hidden)document.querySelectorAll('.private').forEach(function(e){e.classList.add('hidden-val');});
 }
 
-// ── PRICE FETCH ───────────────────────────────────────────────
-function tryFetch(url){ return fetch(url,{cache:'no-store'}).then(function(r){return r.json();}); }
+// ── PRICE FETCHING ────────────────────────────────────────────
+function tryFetch(url){return fetch(url,{cache:'no-store'}).then(function(r){return r.json();});}
 function fetchPrice(sym){
-  var ts = '&_=' + Date.now(); // cache-buster
-  var v7url  = 'https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + sym + ts;
-  var v8url  = 'https://query1.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=5d' + ts;
-  var v8url2 = 'https://query2.finance.yahoo.com/v8/finance/chart/' + sym + '?interval=1d&range=5d' + ts;
-
-  function parseV7(d){
-    var q = d.quoteResponse.result[0];
-    return { price: q.regularMarketPrice, prev: q.regularMarketPreviousClose };
-  }
-  function parseV8(d){
-    var m = d.chart.result[0].meta;
-    return { price: m.regularMarketPrice, prev: m.chartPreviousClose };
-  }
-
-  var apis = [
-    // 1. Direct Yahoo v7 — works in many browsers/regions
-    function(){ return tryFetch(v7url).then(parseV7); },
-    // 2. Direct Yahoo v8
-    function(){ return tryFetch(v8url).then(parseV8); },
-    // 3. corsproxy + v7
-    function(){
-      return tryFetch('https://corsproxy.io/?' + encodeURIComponent(v7url))
-        .then(parseV7);
-    },
-    // 4. corsproxy + v8
-    function(){
-      return tryFetch('https://corsproxy.io/?' + encodeURIComponent(v8url2))
-        .then(parseV8);
-    },
-    // 5. allorigins + v7 (may be cached but last resort)
-    function(){
-      return tryFetch('https://api.allorigins.win/get?url=' + encodeURIComponent(v7url))
-        .then(function(d){ return parseV7(JSON.parse(d.contents)); });
-    },
-    // 6. allorigins + v8
-    function(){
-      return tryFetch('https://api.allorigins.win/get?url=' + encodeURIComponent(v8url2))
-        .then(function(d){ return parseV8(JSON.parse(d.contents)); });
-    }
+  var ts='&_='+Date.now();
+  var v7='https://query2.finance.yahoo.com/v7/finance/quote?symbols='+sym+ts;
+  var v8='https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=5d'+ts;
+  function parseV7(d){var q=d.quoteResponse.result[0];return{price:q.regularMarketPrice,prev:q.regularMarketPreviousClose};}
+  function parseV8(d){var m=d.chart.result[0].meta;return{price:m.regularMarketPrice,prev:m.chartPreviousClose};}
+  var apis=[
+    function(){return tryFetch(v7).then(parseV7);},
+    function(){return tryFetch(v8).then(parseV8);},
+    function(){return tryFetch('https://corsproxy.io/?'+encodeURIComponent(v7)).then(parseV7);},
+    function(){return tryFetch('https://corsproxy.io/?'+encodeURIComponent(v8)).then(parseV8);},
+    function(){return tryFetch('https://api.allorigins.win/get?url='+encodeURIComponent(v7)).then(function(d){return parseV7(JSON.parse(d.contents));});},
   ];
-
-  var p = Promise.reject(new Error('start'));
-  apis.forEach(function(fn){ p = p.catch(function(){ return fn(); }); });
-  return p
-    .then(function(r){
-      // Sanity check — prev should never equal price exactly (stale cache)
-      if (!r || !r.price || r.price <= 0) throw new Error('bad price');
-      return r;
-    })
-    .catch(function(){ return null; });
-}
-
-// ── TRANSACTION FORM ──────────────────────────────────────────
-function calcTotal(){
-  var s = parseFloat(el('f-shares').value) || 0;
-  var p = parseFloat(el('f-price').value)  || 0;
-  var t = el('f-total');
-  if(t) t.value = (s && p) ? (s*p).toFixed(2) : '';
-}
-
-function m$txn(n){
-  return '$' + Math.abs(n).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
+  var p=Promise.reject(new Error('start'));
+  apis.forEach(function(fn){p=p.catch(function(){return fn();});});
+  return p.then(function(r){if(!r||!r.price||r.price<=0)throw new Error('bad');return r;}).catch(function(){return null;});
 }
 
 // ── TRANSACTION LOG ───────────────────────────────────────────
-var TXN_KEY = 'portfolio_txns_v1';
-var txnFilter = 'all';
-
-function loadTxns(){
-  try{ return JSON.parse(localStorage.getItem(TXN_KEY)||'[]'); }
-  catch(e){ return []; }
-}
-function saveTxns(arr){ localStorage.setItem(TXN_KEY, JSON.stringify(arr)); }
-
+function calcTotal(){var s=parseFloat((el('f-shares')||{}).value)||0,p=parseFloat((el('f-price')||{}).value)||0,t=el('f-total');if(t)t.value=(s&&p)?(s*p).toFixed(2):'';}
+function m$txn(n){return'$'+Math.abs(n).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function addTxn(){
-  var date   = (el('f-date')||{}).value;
-  var acct   = (el('f-account')||{}).value;
-  var type   = (el('f-type')||{}).value;
-  var sym    = (el('f-symbol')||{}).value;
-  var shares = parseFloat((el('f-shares')||{}).value);
-  var price  = parseFloat((el('f-price')||{}).value);
-  var note   = ((el('f-note')||{}).value||'').trim();
-
-  if(!date)           { alert('Please enter a date.');   return; }
-  if(!shares||shares<=0){ alert('Please enter shares.'); return; }
-  if(!price||price<=0){ alert('Please enter price.');    return; }
-
-  var arr = loadTxns();
-  arr.push({id:Date.now(), date:date, account:acct, type:type,
-            symbol:sym, shares:shares, price:price,
-            total:parseFloat((shares*price).toFixed(2)), note:note});
-  arr.sort(function(a,b){ return b.date.localeCompare(a.date); });
+  var date=(el('f-date')||{}).value,acct=(el('f-account')||{}).value,type=(el('f-type')||{}).value;
+  var sym=(el('f-symbol')||{}).value,shares=parseFloat((el('f-shares')||{}).value),price=parseFloat((el('f-price')||{}).value);
+  var note=((el('f-note')||{}).value||'').trim();
+  if(!date){alert('Please enter a date.');return;}
+  if(!shares||shares<=0){alert('Please enter shares.');return;}
+  if(!price||price<=0){alert('Please enter price.');return;}
+  var arr=loadTxns();
+  arr.push({id:Date.now(),date:date,account:acct,type:type,symbol:sym,shares:shares,price:price,total:parseFloat((shares*price).toFixed(2)),note:note});
+  arr.sort(function(a,b){return b.date.localeCompare(a.date);});
   saveTxns(arr);
-  if(el('f-shares')) el('f-shares').value='';
-  if(el('f-price'))  el('f-price').value='';
-  if(el('f-total'))  el('f-total').value='';
-  if(el('f-note'))   el('f-note').value='';
-  renderTxns();
-  renderHistory();
+  if(el('f-shares'))el('f-shares').value='';if(el('f-price'))el('f-price').value='';
+  if(el('f-total'))el('f-total').value='';if(el('f-note'))el('f-note').value='';
+  renderTxns();renderHistory();
 }
-
-function deleteTxn(id){
-  saveTxns(loadTxns().filter(function(t){ return t.id!==id; }));
-  renderTxns(); renderHistory();
-}
-
-function setFilter(f, btn){
-  txnFilter = f;
-  document.querySelectorAll('#txn-filters .txn-filter').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  renderTxns();
-}
-
+function deleteTxn(id){saveTxns(loadTxns().filter(function(t){return t.id!==id;}));renderTxns();renderHistory();}
+function setFilter(f,btn){txnFilter=f;document.querySelectorAll('#txn-filters .txn-filter').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');renderTxns();}
 function renderTxns(){
-  var all = loadTxns();
-  var filtered = all.filter(function(t){
-    if(txnFilter==='all') return true;
-    if(['buy','sell','div'].includes(txnFilter)) return t.type===txnFilter;
-    return t.account===txnFilter;
-  });
-  var wrap = el('txn-list-wrap');
-  if(!wrap) return;
-
-  if(!filtered.length){
-    wrap.innerHTML='<div class="txn-empty">No transactions yet — add your first trade above</div>';
-  } else {
-    wrap.innerHTML = filtered.map(function(t){
-      var tc = t.type==='buy'?'buy':t.type==='sell'?'sell':'div';
-      var tl = t.type==='buy'?'BUY':t.type==='sell'?'SELL':'DIV';
-      var ac = t.type==='sell'?'var(--red)':t.type==='div'?'var(--yellow)':'var(--green)';
-      var as = t.type==='sell'?'-':'+';
-      return '<div class="txn-row">'+
-        '<div class="txn-date">'+t.date+'</div>'+
-        '<span class="txn-type '+tc+'">'+tl+'</span>'+
-        '<div><div class="txn-sym">'+t.symbol+' <span style="color:var(--dim);font-size:8px;">'+t.account+'</span></div>'+
-        '<div class="txn-detail">'+t.shares.toFixed(4)+' sh @ $'+t.price.toFixed(2)+(t.note?' · '+t.note:'')+'</div></div>'+
-        '<div class="txn-amount" style="color:'+ac+'">'+as+m$txn(t.total)+'</div>'+
-        '<button class="txn-del" onclick="deleteTxn('+t.id+')">✕</button>'+
-      '</div>';
-    }).join('');
-  }
-
-  var buys = all.filter(function(t){return t.type==='buy';});
-  var sells= all.filter(function(t){return t.type==='sell';});
-  set('ts-count',    all.length);
-  set('ts-invested', m$txn(buys.reduce(function(s,t){return s+t.total;},0)));
-  set('ts-proceeds', m$txn(sells.reduce(function(s,t){return s+t.total;},0)));
-  set('txn-meta',    all.length+' transaction'+(all.length!==1?'s':'')+' · tap to '+(el('txn-body')&&el('txn-body').classList.contains('open')?'collapse':'expand'));
+  var all=loadTxns();
+  var filtered=all.filter(function(t){if(txnFilter==='all')return true;if(['buy','sell','div'].indexOf(txnFilter)>=0)return t.type===txnFilter;return t.account===txnFilter;});
+  var wrap=el('txn-list-wrap');if(!wrap)return;
+  if(!filtered.length){wrap.innerHTML='<div class="txn-empty">No transactions yet \u2014 add your first trade above</div>';}
+  else{wrap.innerHTML=filtered.map(function(t){var tc=t.type==='buy'?'buy':t.type==='sell'?'sell':'div';var tl=t.type==='buy'?'BUY':t.type==='sell'?'SELL':'DIV';var ac=t.type==='sell'?'var(--red)':t.type==='div'?'var(--yellow)':'var(--green)';var as=t.type==='sell'?'-':'+';return'<div class="txn-row"><div class="txn-date">'+t.date+'</div><span class="txn-type '+tc+'">'+tl+'</span><div><div class="txn-sym">'+t.symbol+' <span style="color:var(--dim);font-size:8px;">'+t.account+'</span></div><div class="txn-detail">'+t.shares.toFixed(4)+' sh @ $'+t.price.toFixed(2)+(t.note?' \u00b7 '+t.note:'')+'</div></div><div class="txn-amount" style="color:'+ac+'">'+as+m$txn(t.total)+'</div><button class="txn-del" onclick="deleteTxn('+t.id+')">&#10005;</button></div>';}).join('');}
+  var buys=all.filter(function(t){return t.type==='buy';}),sells=all.filter(function(t){return t.type==='sell';});
+  set('ts-count',all.length);set('ts-invested',m$txn(buys.reduce(function(s,t){return s+t.total;},0)));set('ts-proceeds',m$txn(sells.reduce(function(s,t){return s+t.total;},0)));
+  set('txn-meta',all.length+' transaction'+(all.length!==1?'s':'')+' \u00b7 tap to '+(el('txn-body')&&el('txn-body').classList.contains('open')?'collapse':'expand'));
 }
-
-function toggleTxn(){
-  var b=el('txn-body'), c=el('txn-chev');
-  if(b)b.classList.toggle('open');
-  if(c)c.classList.toggle('open');
-  renderTxns();
-}
-
+function toggleTxn(){var b=el('txn-body'),c=el('txn-chev');if(b)b.classList.toggle('open');if(c)c.classList.toggle('open');renderTxns();}
 function exportCSV(){
-  var arr = loadTxns();
-  if(!arr.length){ alert('No transactions to export.'); return; }
-  var rows = ['Date,Account,Type,Symbol,Shares,Price,Total,Note'];
-  arr.forEach(function(t){
-    rows.push([t.date,t.account,t.type.toUpperCase(),t.symbol,
-               t.shares,t.price,t.total,'"'+(t.note||'')+'"'].join(','));
-  });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
-  a.download = 'portfolio_transactions.csv';
-  a.click();
+  var arr=loadTxns();if(!arr.length){alert('No transactions to export.');return;}
+  var rows=['Date,Account,Type,Symbol,Shares,Price,Total,Note'];
+  arr.forEach(function(t){rows.push([t.date,t.account,t.type.toUpperCase(),t.symbol,t.shares,t.price,t.total,'"'+(t.note||'')+'"'].join(','));});
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));a.download='portfolio_transactions.csv';a.click();
 }
 
-// ── PER-ACCOUNT GROWTH DATA ───────────────────────────────────────
-// Historical year-end values (estimated from share counts × prices)
-var ACCT_GROWTH = {
-  'comb': {
-    title: 'Combined TFSAs — Portfolio Value',
-    color: '#6366f1',
-    labels: ['2019','2020','2021','2022','2023','2024','Now'],
-    actual: [10200,11800,29500,42100,117400,171000,0],
-    contrib:[9017, 9017, 16692,33167,81229, 88229, 102429]
-  },
-  'amit': {
-    title: "Amit's TFSA — Portfolio Value",
-    color: '#16a34a',
-    labels: ["Dec'21","Dec'22","Dec'23","Dec'24","Now"],
-    actual: [29670, 52635, 102980, 127955, 0],
-    contrib:[40000, 65000, 90000,  100000, 109000]
-  },
-  'trisha': {
-    title: "Trisha's TFSA — Portfolio Value",
-    color: '#ea6c00',
-    labels: ["Jul'23","Dec'23","Dec'24","Now"],
-    actual: [41499, 43563, 58610, 0],
-    contrib:[41499, 41499, 41499, 41499]
-  },
-  'amit-rrsp': {
-    title: "Amit's RRSP — Portfolio Value",
-    color: '#2563eb',
-    labels: ["Aug'22","Jan'23","Apr'26 Now"],
-    actual: [34000, 48500, 0],
-    contrib:[43521, 43521, 43521]
-  },
-  'spousal': {
-    title: "Spousal RRSP — Portfolio Value",
-    color: '#7c3aed',
-    labels: ["2021","2022","2023","2024","Now"],
-    actual: [8583, 9200, 11000, 15500, 0],
-    contrib:[8583, 8583, 8583,  8583,  8583]
+// ── BUILD HISTORY FROM ALL BROKERS ───────────────────────────
+function buildHistoryTxns(){
+  // This mirrors the TRADE_HISTORY inside buildPortfolioContext
+  // but as a standalone array for the Transaction History panel
+  var TH = [
+    {date:"2018-04-13",account:"Amit TFSA",broker:"Wealthsimple Robo",type:"buy",sym:"VEQT",q:383,p:23.54,net:9017},
+    {date:"2021-04-27",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:33.84,net:236.90},
+    {date:"2021-05-11",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:8,p:32.93,net:263.47},
+    {date:"2021-06-08",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:34.14,net:239.00},
+    {date:"2021-06-22",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:34.60,net:242.22},
+    {date:"2021-07-06",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:35.04,net:245.30},
+    {date:"2021-07-20",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:35.06,net:245.44},
+    {date:"2021-08-03",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:35.44,net:248.10},
+    {date:"2021-08-31",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:6,p:36.33,net:218.00},
+    {date:"2021-09-07",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:17,p:36.67,net:623.45,note:"From BTCC.B"},
+    {date:"2021-09-14",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:36.28,net:253.98},
+    {date:"2021-09-28",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:8,p:35.49,net:283.95},
+    {date:"2021-10-12",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:8,p:35.12,net:280.99},
+    {date:"2021-10-26",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:36.43,net:255.03},
+    {date:"2021-11-09",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:8,p:37.08,net:296.67},
+    {date:"2021-11-23",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:37.09,net:259.65},
+    {date:"2021-11-26",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:82,p:36.64,net:3004.77,note:"Lump sum"},
+    {date:"2021-12-09",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:8,p:36.92,net:295.39},
+    {date:"2021-12-24",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:37.45,net:262.17},
+    {date:"2022-01-05",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:37.02,net:259.16},
+    {date:"2022-01-18",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:89,p:35.71,net:3177.12,note:"Bear market"},
+    {date:"2022-01-21",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:86,p:34.84,net:2996.54,note:"Bear market"},
+    {date:"2022-02-03",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:6,p:35.66,net:213.98},
+    {date:"2022-02-16",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:35.55,net:106.65},
+    {date:"2022-03-01",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:34.42,net:103.26},
+    {date:"2022-03-18",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:2,p:35.02,net:70.05},
+    {date:"2022-03-30",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:35.75,net:107.26},
+    {date:"2022-04-14",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:34.93,net:104.80},
+    {date:"2022-04-26",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:33.60,net:100.81},
+    {date:"2022-05-10",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:32.40,net:97.21},
+    {date:"2022-05-25",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:32.41,net:97.24},
+    {date:"2022-06-07",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:3,p:32.97,net:98.92},
+    {date:"2022-07-05",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:30.57,net:214.01},
+    {date:"2022-07-13",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:97,p:30.69,net:2977.27,note:"Bear market"},
+    {date:"2022-07-26",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:182,p:31.34,net:5704.17,note:"Bear market"},
+    {date:"2023-02-06",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:6,p:34.23,net:205.40},
+    {date:"2023-02-10",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:6,p:33.98,net:203.90},
+    {date:"2023-02-22",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:148,p:33.71,net:4990.18,note:"Lump sum"},
+    {date:"2023-02-23",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:34,p:33.77,net:1148.30},
+    {date:"2023-06-27",account:"Amit TFSA",broker:"Questrade",type:"sell",sym:"VEQT",q:2815,p:34.40,net:96826,note:"Round trip"},
+    {date:"2023-06-27",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VFV",q:472,p:102.60,net:48427,note:"Round trip"},
+    {date:"2023-08-11",account:"Amit TFSA",broker:"Questrade",type:"sell",sym:"VFV",q:473,p:106.44,net:50340,note:"Back to VEQT"},
+    {date:"2023-08-11",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:2806,p:35.73,net:100237,note:"Back to VEQT"},
+    {date:"2024-01-10",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:1.3436,p:36.74,net:49.33},
+    {date:"2024-01-11",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:52.8345,p:36.78,net:1942.77},
+    {date:"2024-01-15",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:6.8062,p:36.73,net:250},
+    {date:"2024-01-25",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:6.7061,p:37.19,net:249.37},
+    {date:"2024-01-30",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:5.3403,p:37.54,net:200.46},
+    {date:"2024-02-09",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:6.6340,p:37.71,net:250.17},
+    {date:"2024-02-22",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:6.5513,p:38.16,net:250},
+    {date:"2024-03-08",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:6.3808,p:39.18,net:250},
+    {date:"2024-05-22",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:134.4732,p:40.91,net:5500,note:"Lump sum"},
+    {date:"2024-05-28",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:1.2242,p:40.84,net:50},
+    {date:"2024-10-24",account:"Amit TFSA",broker:"Wealthsimple",type:"sell",sym:"VEQT",q:156,p:44.81,net:6990,note:"VFV switch"},
+    {date:"2024-10-24",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VFV",q:48.8255,p:143.17,net:6990,note:"VFV switch"},
+    {date:"2024-11-14",account:"Amit TFSA",broker:"Wealthsimple",type:"sell",sym:"VEQT",q:153,p:45.64,net:6983,note:"VFV switch"},
+    {date:"2024-11-14",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VFV",q:46.9375,p:148.79,net:6983,note:"VFV switch"},
+    {date:"2024-12-24",account:"Amit TFSA",broker:"Wealthsimple",type:"sell",sym:"VEQT",q:434,p:46.18,net:20042,note:"VFV switch"},
+    {date:"2024-12-24",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VFV",q:131.7377,p:152.17,net:20042,note:"VFV switch"},
+    {date:"2024-12-30",account:"Amit TFSA",broker:"Wealthsimple",type:"sell",sym:"VEQT",q:151,p:46.42,net:7010,note:"VFV switch"},
+    {date:"2024-12-30",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VFV",q:45.8402,p:152.94,net:7010,note:"VFV switch"},
+    {date:"2025-01-06",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VFV",q:16.5181,p:151.45,net:2500},
+    {date:"2025-01-08",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:2,p:45.41,net:90.82},
+    {date:"2025-01-09",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:33.6659,p:45.35,net:1526.75,note:"Div reinvest"},
+    {date:"2025-01-09",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VFV",q:13.9448,p:150.67,net:2100},
+    {date:"2025-03-19",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:17.7313,p:45.10,net:800},
+    {date:"2025-03-31",account:"Amit TFSA",broker:"Wealthsimple",type:"buy",sym:"VEQT",q:18.9723,p:44.82,net:850},
+    {date:"2025-04-07",account:"Amit TFSA",broker:"Wealthsimple",type:"div",sym:"VFV",q:0.9389,p:130.98,net:122.97,note:"Div reinvest"},
+    {date:"2026-01-12",account:"Amit TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:49.4552,p:55.54,net:2748.37},
+    {date:"2026-01-19",account:"Amit TFSA",broker:"Qtrade",type:"buy",sym:"VFV",q:90,p:171.34,net:15420.60,note:"Transfer in"},
+    {date:"2026-02-05",account:"Amit TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:19.987,p:55.35,net:1106.40},
+    {date:"2026-02-20",account:"Amit TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:17.88,p:55.92,net:1000},
+    {date:"2026-03-18",account:"Amit TFSA",broker:"TD Direct",type:"buy",sym:"VFV",q:18.54,p:161.72,net:2998.29},
+    {date:"2026-03-20",account:"Amit TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:20.726,p:53.17,net:1102.20},
+    {date:"2026-04-06",account:"Amit TFSA",broker:"Qtrade",type:"div",sym:"VFV",q:0.24,p:173.81,net:41.71,note:"Div reinvest"},
+    {date:"2026-04-09",account:"Amit TFSA",broker:"TD Direct",type:"div",sym:"VEQT",q:1.8007,p:56.09,net:101,note:"Div reinvest"},
+    {date:"2026-05-28",account:"Amit TFSA",broker:"TD Direct",type:"sell",sym:"VFV",q:239.54,p:185.02,net:44319.69,note:"VFV→VEQT switch"},
+    {date:"2026-05-28",account:"Amit TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:738.79,p:59.988,net:44317.01,note:"VFV→VEQT switch"},
+    {date:"2026-05-28",account:"Amit TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:0.056,p:59.99,net:3.36,note:"Fractional"},
+    {date:"2026-05-28",account:"Amit TFSA",broker:"Qtrade",type:"sell",sym:"VFV",q:90,p:185.00,net:16650,note:"VFV→VEQT switch"},
+    {date:"2026-05-28",account:"Amit TFSA",broker:"Qtrade",type:"buy",sym:"VEQT",q:278,p:59.9664,net:16670.66,note:"VFV→VEQT switch"},
+    {date:"2021-06-24",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:52,p:34.75,net:1807.18,note:"RRSP start"},
+    {date:"2021-07-26",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:1,p:35.37,net:35.37},
+    {date:"2021-07-30",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:1,p:35.28,net:35.28},
+    {date:"2021-12-07",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:1,p:36.94,net:36.94},
+    {date:"2022-05-16",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:33,p:32.34,net:1067.34,note:"Transfer in"},
+    {date:"2022-05-27",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:28,p:33.25,net:931.10,note:"Transfer in"},
+    {date:"2022-07-05",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:1,p:30.55,net:30.55},
+    {date:"2022-08-02",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:375,p:32.51,net:12192.56,note:"Major contribution"},
+    {date:"2023-01-04",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:26,p:32.29,net:839.63},
+    {date:"2024-01-09",account:"Amit RRSP",broker:"Questrade RRSP",type:"buy",sym:"VEQT",q:1,p:36.77,net:36.77},
+    {date:"2026-01-15",account:"Amit RRSP",broker:"TD Direct",type:"buy",sym:"VEQT",q:1402,p:55.80,net:78231.60,note:"Transfer from Questrade"},
+    {date:"2026-02-05",account:"Amit RRSP",broker:"TD Direct",type:"div",sym:"VEQT",q:0.987,p:55.40,net:54.68,note:"Div reinvest"},
+    {date:"2026-02-20",account:"Amit RRSP",broker:"TD Direct",type:"buy",sym:"VEQT",q:17.88,p:55.92,net:1000},
+    {date:"2026-03-20",account:"Amit RRSP",broker:"TD Direct",type:"buy",sym:"VEQT",q:0.726,p:53.17,net:38.60},
+    {date:"2026-04-09",account:"Amit RRSP",broker:"TD Direct",type:"div",sym:"VEQT",q:1.8007,p:56.09,net:101,note:"Div reinvest"},
+    {date:"2023-07-17",account:"Trisha TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:904,p:35.50,net:32092.01,note:"Trisha start"},
+    {date:"2023-07-26",account:"Trisha TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:234,p:35.96,net:8414.76},
+    {date:"2023-07-31",account:"Trisha TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:27,p:36.16,net:976.41},
+    {date:"2024-01-09",account:"Trisha TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:22,p:36.77,net:809.02},
+    {date:"2024-01-17",account:"Trisha TFSA",broker:"Questrade",type:"sell",sym:"VEQT",q:1187,p:36.77,net:43635.99,note:"In-kind to VFV"},
+    {date:"2024-03-01",account:"Trisha TFSA",broker:"TD Direct",type:"buy",sym:"VFV",q:287.172,p:140.63,net:40387.58,note:"Avg book cost"},
+    {date:"2026-01-19",account:"Trisha TFSA",broker:"Qtrade",type:"buy",sym:"VFV",q:97.998,p:157.36,net:15421.21,note:"Transfer in"},
+    {date:"2026-04-06",account:"Trisha TFSA",broker:"TD Direct",type:"div",sym:"VFV",q:0.70,p:173.81,net:121.67,note:"Div reinvest"},
+    {date:"2026-05-28",account:"Trisha TFSA",broker:"TD Direct",type:"sell",sym:"VFV",q:287.172,p:185.01,net:53129.69,note:"VFV→VEQT switch"},
+    {date:"2026-05-28",account:"Trisha TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:885.60,p:59.98,net:53118.29,note:"VFV→VEQT switch"},
+    {date:"2026-05-28",account:"Trisha TFSA",broker:"TD Direct",type:"buy",sym:"VEQT",q:0.22,p:59.98,net:13.20,note:"Fractional"},
+    {date:"2026-05-28",account:"Trisha TFSA",broker:"Qtrade",type:"sell",sym:"VFV",q:93,p:184.93,net:17198.49,note:"VFV→VEQT switch"},
+    {date:"2026-05-28",account:"Trisha TFSA",broker:"Qtrade",type:"buy",sym:"VEQT",q:287,p:59.98,net:17214.26,note:"VFV→VEQT switch"},
+    {date:"2021-01-01",account:"Spousal RRSP",broker:"Questrade",type:"buy",sym:"VEQT",q:323.47,p:26.53,net:8583,note:"Opening estimated"},
+    {date:"2022-03-10",account:"Spousal RRSP",broker:"Questrade",type:"div",sym:"VEQT",q:4,p:34.12,net:136.48,note:"Div reinvest"},
+    {date:"2023-02-22",account:"Spousal RRSP",broker:"Questrade",type:"div",sym:"VEQT",q:7,p:33.75,net:236.27,note:"Div reinvest"},
+    {date:"2024-01-09",account:"Spousal RRSP",broker:"Questrade",type:"div",sym:"VEQT",q:6,p:36.77,net:220.64,note:"Div reinvest"},
+    {date:"2025-01-09",account:"Spousal RRSP",broker:"Questrade",type:"div",sym:"VEQT",q:5,p:45.61,net:228.07,note:"Div reinvest"},
+    {date:"2026-01-12",account:"Spousal RRSP",broker:"Questrade",type:"div",sym:"VEQT",q:4,p:55.84,net:223.36,note:"Div reinvest"},
+  ];
+  return TH.map(function(t){
+    return {date:t.date,account:t.account,broker:t.broker,type:t.type,
+            symbol:t.sym,shares:t.q,price:t.p,net:t.net,note:t.note||''};
+  });
+}
+
+// ── CHART TAB SWITCHER ───────────────────────────────────────
+var activeChartTab = 'total';
+function switchChartTab(tab){
+  activeChartTab = tab;
+  var totalPanel = el('chart-panel-total');
+  var acctPanel  = el('chart-panel-acct');
+  var totalBtn   = el('chart-tab-total');
+  var acctBtn    = el('chart-tab-acct');
+  if(tab==='total'){
+    if(totalPanel) totalPanel.style.display='';
+    if(acctPanel)  acctPanel.style.display='none';
+    if(totalBtn){totalBtn.style.background='var(--blue)';totalBtn.style.color='#fff';totalBtn.style.borderColor='var(--blue)';}
+    if(acctBtn) {acctBtn.style.background='var(--surface)';acctBtn.style.color='var(--muted)';acctBtn.style.borderColor='var(--border)';}
+    buildTotalLine();
+  } else {
+    if(totalPanel) totalPanel.style.display='none';
+    if(acctPanel)  acctPanel.style.display='';
+    if(acctBtn) {acctBtn.style.background='var(--blue)';acctBtn.style.color='#fff';acctBtn.style.borderColor='var(--blue)';}
+    if(totalBtn){totalBtn.style.background='var(--surface)';totalBtn.style.color='var(--muted)';totalBtn.style.borderColor='var(--border)';}
+    var id=curSel==='comb'?'comb':curSel==='amit'?'amit':'trisha';
+    buildAcctGrowthChart(id);
   }
-};
+}
 
-var acctGrowthChart = null;
+// ── ACCOUNT TILE TAP → show growth chart ─────────────────────
+function onAccountTileTap(acctId){
+  // Map tile IDs to chart IDs and selector IDs
+  var chartMap = {amit:'amit', trisha:'trisha', rrsp:'amit', spousal:'spousal'};
+  var selMap   = {amit:'amit', trisha:'trisha', rrsp:'comb',  spousal:'comb'};
+  var growthId = chartMap[acctId] || 'amit';
+  // Switch to By Account tab
+  switchChartTab('acct');
+  // Update account selector highlight
+  curSel = selMap[acctId] || 'amit';
+  buildSelector();
+  // Show chart
+  buildAcctGrowthChart(growthId);
+  // Scroll to chart
+  var panel = el('chart-panel-acct');
+  if(panel) panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
 
-function buildAcctGrowthChart(acctId){
-  var c  = calcAccounts(VP, FP);
-  var gd = ACCT_GROWTH[acctId];
-  if(!gd) return;
-
-  // Fill live "Now" value
-  var liveVal = {
-    'comb':     c.amitA + c.trishaA,
-    'amit':     c.amitA,
-    'trisha':   c.trishaA,
-    'amit-rrsp':c.rrsp,
-    'spousal':  c.spousal
-  }[acctId] || 0;
-
-  var actualData  = gd.actual.slice();
-  actualData[actualData.length-1] = Math.round(liveVal);
-
-  // Update title
-  var titleEl = el('acct-growth-title');
-  var subEl   = el('acct-growth-sub');
-  if(titleEl) titleEl.textContent = gd.title + ' ●';
-  if(subEl)   subEl.textContent   = 'Value: ' + m$(Math.round(liveVal)) + '  ·  Last point updates live';
-
-  var ctx = el('acct-growth-chart');
-  if(!ctx) return;
-  if(acctGrowthChart) acctGrowthChart.destroy();
-
-  acctGrowthChart = new Chart(ctx.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: gd.labels,
-      datasets: [
-        {
-          label: 'Portfolio Value',
-          data: actualData,
-          borderColor: gd.color,
-          backgroundColor: gd.color + '18',
-          borderWidth: 3,
-          fill: true,
-          pointRadius: 5,
-          pointBackgroundColor: gd.color,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          tension: 0.4,
-          order: 1
-        },
-        {
-          label: 'Contributed',
-          data: gd.contrib,
-          borderColor: '#b45309',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          borderDash: [5,4],
-          fill: false,
-          pointRadius: 3,
-          pointBackgroundColor: '#b45309',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          tension: 0.3,
-          order: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: {mode:'index', intersect:false},
-      plugins: {
-        legend: {
-          display: true,
-          labels: {color:'#6b7499', font:{size:9}, boxWidth:10, usePointStyle:true, pointStyle:'circle'}
-        },
-        tooltip: {
-          backgroundColor:'#fff', borderColor:'#e2e7f5', borderWidth:1,
-          titleColor:'#1a1d3a', bodyColor:'#6b7499', padding:10, cornerRadius:10,
-          callbacks: {
-            label: function(c){ return ' ' + c.dataset.label + ': ' + m$(c.parsed.y); },
-            afterLabel: function(c){
-              if(c.datasetIndex===0){
-                var g = c.parsed.y - gd.contrib[c.dataIndex];
-                return ' Gain: ' + (g>=0?'+':'') + m$(g);
-              }
-              return '';
-            }
-          }
-        }
-      },
-      scales: {
-        x: {grid:{color:'#e2e7f5'}, ticks:{color:'#6b7499',font:{size:9}}},
-        y: {
-          grid: {color:'#e2e7f5'},
-          ticks: {color:'#6b7499', font:{size:9}, callback:function(v){return '$'+(v/1000).toFixed(0)+'k';}}
-        }
-      }
-    }
+// ── PRIVACY TOGGLE ───────────────────────────────────────────
+var privacyOn = false;
+function togglePrivacy(){
+  privacyOn = !privacyOn;
+  var btn = el('privacy-btn');
+  if(btn) btn.textContent = privacyOn ? '🙈' : '👁';
+  document.querySelectorAll('.private').forEach(function(e){
+    e.style.filter = privacyOn ? 'blur(6px)' : 'none';
+    e.style.userSelect = privacyOn ? 'none' : '';
   });
 }
 
 // ── FETCH ALL + INIT ──────────────────────────────────────────
 async function fetchAll(){
-  var btn = el('refresh-btn');
-  if(btn){ btn.textContent = '⟳'; btn.disabled = true; btn.style.opacity = '.6'; }
-
-  var results = await Promise.all([fetchPrice('VEQT.TO'), fetchPrice('VFV.TO')]);
-  var v = results[0], f = results[1];
-
-  function applyTicker(data, pId, cId){
-    if(!data){ set(pId,'N/A'); set(cId,''); return; }
-    var ch = data.price - data.prev, up = ch >= 0;
-    var col = up ? 'var(--green)' : 'var(--red)';
-    set(pId, m$(data.price,2), col);
-    set(cId, (up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+(ch/data.prev*100).toFixed(2)+'%)', col);
+  var btn=el('refresh-btn');
+  if(btn){btn.textContent='\u27F3';btn.disabled=true;btn.style.opacity='.6';}
+  var results=await Promise.all([fetchPrice('VEQT.TO'),fetchPrice('VFV.TO')]);
+  var v=results[0],f=results[1];
+  function applyTicker(data,pId,cId){
+    if(!data){set(pId,'N/A');set(cId,'');return;}
+    var ch=data.price-data.prev,up=ch>=0;
+    set(pId,m$(data.price,2),up?'var(--green)':'var(--red)');
+    set(cId,(up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+(ch/data.prev*100).toFixed(2)+'%)',up?'var(--green)':'var(--red)');
   }
-
-  applyTicker(v, 'veqt-p', 'veqt-c');
-  applyTicker(f, 'vfv-p',  'vfv-c');
-
-  if(v){ VP = v.price; VP_PREV = v.prev; }
-  if(f){ FP = f.price; FP_PREV = f.prev; }
-
-  set('last-updated', 'Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+  applyTicker(v,'veqt-p','veqt-c');
+  applyTicker(f,'vfv-p','vfv-c');
+  if(v){VP=v.price;VP_PREV=v.prev;}
+  if(f){FP=f.price;FP_PREV=f.prev;}
+  set('last-updated','Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
   updateLiveValues();
-
-  if(btn){ btn.textContent = '↻'; btn.disabled = false; btn.style.opacity = '1'; }
+  if(btn){btn.textContent='\u21BB';btn.disabled=false;btn.style.opacity='1';}
 }
 
 // ── DOM READY ─────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function(){
-  // Set default date in transaction form
-  var today = new Date().toISOString().split('T')[0];
-  var fd = el('f-date'); if(fd) fd.value = today;
-
-  // Safe event listeners
-  var fs = el('f-shares'); if(fs) fs.addEventListener('input', calcTotal);
-  var fp = el('f-price');  if(fp) fp.addEventListener('input', calcTotal);
-  var ci = el('chat-input');
-  if(ci) ci.addEventListener('input', function(){
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-  });
-
-  // Init UI
-  buildSelector();
-  buildMain();
-  buildTotalLine();
-  buildAccountTiles();
-  buildTable();
-  renderTxns();
-  renderHistory();
-
-  // Start live prices
+document.addEventListener('DOMContentLoaded',function(){
+  var today=new Date().toISOString().split('T')[0];
+  var fd=el('f-date');if(fd)fd.value=today;
+  var fs=el('f-shares');if(fs)fs.addEventListener('input',calcTotal);
+  var fp=el('f-price');if(fp)fp.addEventListener('input',calcTotal);
+  var ci=el('chat-input');
+  if(ci)ci.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';});
+  buildTotalLine();buildAccountTiles();
+  renderTxns();renderHistory();
   fetchAll();
-  setInterval(fetchAll, 60000);
-  // Default account growth chart = combined TFSA
-  setTimeout(function(){ buildAcctGrowthChart('comb'); }, 800);
+  setInterval(fetchAll,60000);
+  setTimeout(function(){buildAcctGrowthChart('comb');},800);
 });
 
 </script>
-
-<!-- CHATBOT FAB -->
-<button class="chat-fab" onclick="toggleChat()" title="Ask about your portfolio">💬</button>
-
-<!-- CHAT PANEL -->
-<div class="chat-panel" id="chat-panel">
-  <div class="chat-header">
-    <div class="chat-header-left">
-      <div class="chat-avatar">🤖</div>
-      <div>
-        <div class="chat-title">Portfolio Assistant</div>
-        <div class="chat-subtitle">Knows your holdings, returns & transactions</div>
-      </div>
-    </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-suggestions" id="chat-suggestions">
-    <button class="suggestion" onclick="askSuggestion(this)">How much have I made?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">Which account is best?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">VEQT vs VFV split?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">What is my XIRR?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">Today's P&L?</button>
-    <button class="suggestion" onclick="askSuggestion(this)">Amit vs Trisha?</button>
-  </div>
-  <div class="chat-messages" id="chat-messages">
-    <div class="msg bot">
-      <div class="msg-bubble">👋 Hi! I know your full portfolio — live prices, holdings, XIRR, VFV analysis and logged transactions. Ask me anything!</div>
-      <div class="msg-time">Portfolio Assistant</div>
-    </div>
-  </div>
-  <div class="chat-input-wrap">
-    <textarea class="chat-input" id="chat-input" placeholder="Ask about your portfolio…" rows="1"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
-    <button class="chat-send" id="chat-send-btn" onclick="sendChat()">➤</button>
-  </div>
-</div>
-
 </body>
 </html>
