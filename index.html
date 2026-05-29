@@ -182,9 +182,9 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
 <body>
 
 <!-- HERO — TOTAL PORTFOLIO (dark terminal style) -->
-<div style="background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:16px;padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;">
+<div style="background:linear-gradient(135deg,#1e3a5f 0%,#1d4ed8 50%,#2563eb 100%);border-radius:16px;padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;">
   <!-- rainbow top stripe -->
-  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#3fb950,#58a6ff,#bc8cff,#f0883e);"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#ffffff,rgba(255,255,255,.4),rgba(255,255,255,.7),#ffffff);"></div>
   <!-- glow orb -->
   <div style="position:absolute;bottom:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(63,185,80,.08),transparent 65%);pointer-events:none;"></div>
 
@@ -192,35 +192,35 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
     <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
       <div class="live-dot"></div>
-      <span style="color:#484f58;font-size:9px;letter-spacing:2px;text-transform:uppercase;">Total Portfolio · All 4 Accounts</span>
+      <span style="color:rgba(255,255,255,.85);font-size:9px;letter-spacing:2px;text-transform:uppercase;">Total Portfolio · All 4 Accounts</span>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:9px;color:#484f58;font-family:inherit;" id="last-updated"></span>
+      <span style="font-size:9px;color:rgba(255,255,255,.8);font-family:inherit;" id="last-updated"></span>
       <button class="refresh-btn" id="refresh-btn" onclick="fetchAll()">↻</button>
     </div>
   </div>
 
   <!-- big value -->
-  <div style="color:#484f58;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">Total Portfolio Value</div>
-  <div style="font-size:32px;font-weight:800;color:#e6edf3;line-height:1;margin-bottom:3px;" id="tp-total">···</div>
-  <div style="font-size:10px;color:#7d8590;margin-bottom:16px;" id="tp-sub">Fetching live prices…</div>
+  <div style="color:rgba(255,255,255,.85);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;">Total Portfolio Value</div>
+  <div style="font-size:32px;font-weight:800;color:#ffffff;line-height:1;margin-bottom:3px;text-shadow:0 1px 4px rgba(0,0,0,.2);" id="tp-total">···</div>
+  <div style="font-size:10px;color:rgba(255,255,255,.95);margin-bottom:16px;" id="tp-sub">Fetching live prices…</div>
 
   <!-- 4 key stats -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Contributed</div>
-      <div style="color:#7d8590;font-size:13px;font-weight:700;">$154,533</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Contributed</div>
+      <div style="color:#ffffff;font-size:13px;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.15);">$202,603</div>
     </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Total Gain</div>
-      <div style="font-size:13px;font-weight:700;color:#3fb950;" id="tp-gain">···</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Total Gain</div>
+      <div style="font-size:13px;font-weight:700;color:#4ade80;" id="tp-gain">···</div>
     </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Multiple</div>
-      <div style="font-size:13px;font-weight:700;color:#26d97f;" id="tp-mult">···</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Multiple</div>
+      <div style="font-size:13px;font-weight:700;color:#34d399;" id="tp-mult">···</div>
     </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Today&#39;s P&amp;L ●</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Today&#39;s P&amp;L ●</div>
       <div style="font-size:13px;font-weight:700;" id="tp-daily">···</div>
       <div style="font-size:8px;color:#484f58;margin-top:2px;" id="tp-daily-sub"></div>
     </div>
@@ -228,20 +228,20 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
 
   <!-- rate of return stats -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">TFSA XIRR</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">TFSA XIRR</div>
       <div style="font-size:13px;font-weight:700;color:#3fb950;">27.94% / yr</div>
     </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">RRSP CAGR</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">RRSP CAGR</div>
       <div style="font-size:13px;font-weight:700;color:#58a6ff;">~14.2% / yr</div>
     </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Blended XIRR</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Blended XIRR</div>
       <div style="font-size:13px;font-weight:700;color:#bc8cff;">~24.0% / yr</div>
     </div>
-    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px;">
-      <div style="color:#484f58;font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Spousal RRSP</div>
+    <div style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:10px;">
+      <div style="color:rgba(255,255,255,.9);font-size:8px;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">Spousal RRSP</div>
       <div style="font-size:13px;font-weight:700;color:#f0883e;">+136.75%</div>
     </div>
   </div>
@@ -265,6 +265,14 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
 <div class="sec">Portfolio Growth Over Time</div>
 <div class="sec-sub">All 4 accounts · last point updates live</div>
 <div class="chart-wrap"><canvas id="total-line-chart" height="220"></canvas></div>
+
+<!-- PER-ACCOUNT GROWTH CHART -->
+<div class="cwrap" style="margin:0 16px 12px;">
+  <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;" id="acct-growth-title">Account Growth ●</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:10px;" id="acct-growth-sub">Tap an account selector below to see its growth</div>
+  <canvas id="acct-growth-chart" height="200"></canvas>
+</div>
+
 
 <!-- BY ACCOUNT BREAKDOWN -->
 <div class="sec">Account Breakdown ●</div>
@@ -440,6 +448,7 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
   Not financial advice · Prices via Yahoo Finance · Auto-refresh every 60s
 </div>
 
+
 <script>
 
 // ══════════════════════════════════════════════
@@ -493,8 +502,8 @@ function buildPortfolioContext() {
 
     'ACCOUNT VALUES (live):\n- Amit TFSA: $' + Math.round(c.amitA).toLocaleString() + ' (contributed $58,905 · holds ' + S.amitTFSA_VEQT + ' VEQT + ' + S.amitTFSA_VFV + ' VFV shares)\n- Amit RRSP: $' + Math.round(c.rrsp).toLocaleString() + ' (book cost $43,521 · holds ' + S.amitRRSP_VEQT + ' VEQT shares)\n- Trisha TFSA: $' + Math.round(c.trishaA).toLocaleString() + ' (contributed $41,499 · holds ' + S.trishaTFSA_VFV + ' VFV shares)\n- Spousal RRSP (Trisha holds, Amit contributes): $' + Math.round(c.spousal).toLocaleString() + ' (original ~$8,583 · holds ' + S.spousal_VEQT + ' VEQT shares + $' + S.spousal_CASH + ' cash)\n\n' +
 
-    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\nTOTAL CONTRIBUTED: $154,533\n' +
-    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/154533)-1)*100).toFixed(1) + '% return)\nOVERALL MULTIPLE: ' + (total/154533).toFixed(2) + 'x\n\n' +
+    'TOTAL PORTFOLIO: $' + Math.round(total).toLocaleString() + '\nTOTAL CONTRIBUTED: $202,603\n' +
+    'TOTAL GAIN: $' + Math.round(gain).toLocaleString() + ' (' + (((total/202603)-1)*100).toFixed(1) + '% return)\nOVERALL MULTIPLE: ' + (total/202603).toFixed(2) + 'x\n\n' +
 
     'PERFORMANCE:\n- TFSA XIRR (Amit + Trisha combined): 27.94% per year\n' +
     '- Amit TFSA XIRR: 27.94% vs VEQT benchmark 17.5% — beats VEQT by ~$3,133, beats VFV by ~$93,212\n- Trisha TFSA XIRR: ~18.7% — slightly trails VEQT benchmark\n' +
@@ -566,9 +575,9 @@ function localAnswer(question, context) {
   var q = question.toLowerCase();
   var c = calcAccounts(VP, FP);
   var total = c.total;
-  var gain  = total - 154533;
+  var gain  = total - 202603;
   var txns  = loadTxns();
-  var totalVEQT = S.amitTFSA_VEQT + S.amitRRSP_VEQT + S.spousal_VEQT;
+  var totalVEQT = S.amitTFSA_VEQT + (S.trishaTFSA_VEQT||0) + S.amitRRSP_VEQT + S.spousal_VEQT;
   var totalVFV  = S.amitTFSA_VFV  + S.trishaTFSA_VFV;
   var veqtVal   = totalVEQT * VP;
   var vfvVal    = totalVFV  * FP;
@@ -577,15 +586,15 @@ function localAnswer(question, context) {
   var dailyPL   = (totalVEQT*(VP-VP_PREV)) + (totalVFV*(FP-FP_PREV));
 
   if (q.match(/how much.*(made|gained|profit|return|up)/i) || q.match(/total.*(gain|profit|return)/i)) {
-    return ['**Total portfolio gain: +' + m$(Math.round(gain)) + '** (' + (((total/154533)-1)*100).toFixed(1) + '% return)',
-      'Amt TFSA: +' + m$(Math.round(c.amitA-58905)),
+    return ['**Total portfolio gain: +' + m$(Math.round(gain)) + '** (' + (((total/202603)-1)*100).toFixed(1) + '% return)',
+      'Amt TFSA: +' + m$(Math.round(c.amitA-109000)),
       'Amit RRSP: +' + m$(Math.round(c.rrsp-43521)),
       'Trisha TFSA: +' + m$(Math.round(c.trishaA-41499)),
       'Spousal RRSP: +' + m$(Math.round(c.spousal-8583))].join('\n');
   }
   if (q.match(/best|top|highest|performing|winner/i)) {
     var accs = [
-      {n:'Amit TFSA',   v:c.amitA,   c:58905},
+      {n:'Amit TFSA',   v:c.amitA,   c:109000},
       {n:'Amit RRSP',   v:c.rrsp,    c:43521},
       {n:'Trisha TFSA', v:c.trishaA, c:41499},
       {n:'Spousal RRSP',v:c.spousal, c:8583}
@@ -610,7 +619,7 @@ function localAnswer(question, context) {
   }
   if (q.match(/trisha/i) && q.match(/amit/i)) {
     return ['**Amit vs Trisha TFSA:**',
-      'Amit: ' + m$(Math.round(c.amitA)) + ' on $58,905 → ' + (c.amitA/58905).toFixed(2) + 'x (27.94% XIRR)',
+      'Amit: ' + m$(Math.round(c.amitA)) + ' on $109,000 → ' + (c.amitA/109000).toFixed(2) + 'x (27.94% XIRR)',
       'Trisha: ' + m$(Math.round(c.trishaA)) + ' on $41,499 → ' + (c.trishaA/41499).toFixed(2) + 'x (~18.7% XIRR)',
       "Amit's edge: 2022 bear market buys + 8 years of DCA."].join('\n');
   }
@@ -629,7 +638,7 @@ function localAnswer(question, context) {
       'VEQT benchmark: 15.96%/yr — you beat it by ~12pp.'].join('\n');
   }
   if (q.match(/contribut|invest|put in|deposit/i)) {
-    return ['**Total contributed: $154,533**',
+    return ['**Total contributed: $202,603**',
       '2018: $9,017 · 2021: $7,675 · 2022: $16,475',
       '2023: $48,062 (Trisha joins) · 2024: $7,000',
       '2025: $7,000 · 2026: $7,200'].join('\n');
@@ -807,11 +816,12 @@ function renderHistory() {
 
 // ── SHARE COUNTS ─────────────────────────────────────────────
 var S = {
-  amitTFSA_VEQT:   2324.24364,
-  amitTFSA_VFV:    334.37632,
-  amitTFSA_CASH:   38.15,
-  trishaTFSA_VFV:  385.16953,
-  trishaTFSA_CASH: 41.32,
+  amitTFSA_VEQT:   3341.08964,  // +738.79+0.056 TD +278 Qtrade (May 28 switch)
+  amitTFSA_VFV:    4.840,        // residual Qtrade after selling 90 of 94.84
+  amitTFSA_CASH:   17.49,
+  trishaTFSA_VEQT: 1172.820,     // 885.60+0.22 TD +287 Qtrade (May 28 switch)
+  trishaTFSA_VFV:  4.998,        // residual Qtrade after selling 93 of 97.998
+  trishaTFSA_CASH: 23.65,
   amitRRSP_VEQT:   1443.71,
   amitRRSP_CASH:   0.09,
   spousal_VEQT:    341.00,
@@ -826,7 +836,7 @@ var B = {
   combVEQT:    3018.1818,
   combVFV:     959.9102   // 564.6798 + 395.2304
 };
-var CONTRIB = { amit:60905, trisha:41499, comb:102404, rrsp:43521, spousal:8583, total:154533 };
+var CONTRIB = { amit:60905, trisha:41499, comb:102404, rrsp:43521, spousal:8583, total:202603 };
 
 // ── STATIC ACCOUNT DATA ───────────────────────────────────────
 var ACCOUNTS = [
@@ -896,7 +906,7 @@ function fmtK(v){ return '$'+Math.round(v/1000)+'k'; }
 // ── LIVE ACCOUNT CALCULATIONS ─────────────────────────────────
 function calcAccounts(V,F){
   var amitA   = S.amitTFSA_VEQT*V + S.amitTFSA_VFV*F + S.amitTFSA_CASH;
-  var trishaA = S.trishaTFSA_VFV*F + S.trishaTFSA_CASH;
+  var trishaA = S.trishaTFSA_VEQT*V + S.trishaTFSA_VFV*F + S.trishaTFSA_CASH;
   var combA   = amitA + trishaA;
   var rrsp    = S.amitRRSP_VEQT*V + S.amitRRSP_CASH;
   var spousal = S.spousal_VEQT*V;
@@ -927,7 +937,14 @@ function buildSelector(){
     btn.className = 'acct-btn' + (a.id===curSel?' active':'');
     btn.setAttribute('data-color', a.dataColor);
     btn.setAttribute('data-id', a.id);
-    btn.onclick = function(){ curSel=a.id; buildSelector(); buildMain(); };
+    btn.onclick = function(){
+      curSel = a.id;
+      buildSelector();
+      buildMain();
+      // Map selector IDs to growth chart IDs
+      var growthId = a.id === 'comb' ? 'comb' : a.id === 'amit' ? 'amit' : 'trisha';
+      buildAcctGrowthChart(growthId);
+    };
     btn.innerHTML =
       '<div class="ab-label" style="color:'+a.color+'">'+a.label+'</div>'+
       '<div class="ab-period">'+a.years+'yr period</div>'+
@@ -1217,7 +1234,7 @@ function buildTotalLine(){
   var ex = Chart.getChart(ctx); if(ex)ex.destroy();
   var c = calcAccounts(VP,FP);
   var portData = [9253,9253,9253,52400,93300,186400,258500,Math.round(c.total)];
-  var contribData = [9017,9017,9017,68796,85271,133333,140333,154533];
+  var contribData = [9017,9017,9017,68796,85271,133333,140333,202603];
   totalLineChart = new Chart(ctx.getContext('2d'),{
     type:'line',
     data:{
@@ -1314,7 +1331,7 @@ function updateLiveValues(){
   set('tp-sub',   'Live · Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
 
   // Daily P&L
-  var totalVEQT = S.amitTFSA_VEQT + S.amitRRSP_VEQT + S.spousal_VEQT;
+  var totalVEQT = S.amitTFSA_VEQT + (S.trishaTFSA_VEQT||0) + S.amitRRSP_VEQT + S.spousal_VEQT;
   var totalVFV  = S.amitTFSA_VFV  + S.trishaTFSA_VFV;
   var dailyPL   = (totalVEQT * (VP - VP_PREV)) + (totalVFV * (FP - FP_PREV));
   var dailyPct  = (c.total - dailyPL) > 0 ? (dailyPL / (c.total - dailyPL) * 100) : 0;
@@ -1334,6 +1351,9 @@ function updateLiveValues(){
   buildAccountTiles();
   buildMain();
   buildTable();
+  // Refresh whichever account chart is showing
+  var growthId = curSel === 'comb' ? 'comb' : curSel === 'amit' ? 'amit' : 'trisha';
+  buildAcctGrowthChart(growthId);
 }
 
 // ── PRICE FETCH ───────────────────────────────────────────────
@@ -1510,6 +1530,145 @@ function exportCSV(){
   a.click();
 }
 
+// ── PER-ACCOUNT GROWTH DATA ───────────────────────────────────────
+// Historical year-end values (estimated from share counts × prices)
+var ACCT_GROWTH = {
+  'comb': {
+    title: 'Combined TFSAs — Portfolio Value',
+    color: '#6366f1',
+    labels: ['2019','2020','2021','2022','2023','2024','Now'],
+    actual: [10200,11800,29500,42100,117400,171000,0],
+    contrib:[9017, 9017, 16692,33167,81229, 88229, 102429]
+  },
+  'amit': {
+    title: "Amit's TFSA — Portfolio Value",
+    color: '#16a34a',
+    labels: ["Dec'21","Dec'22","Dec'23","Dec'24","Now"],
+    actual: [29670, 52635, 102980, 127955, 0],
+    contrib:[40000, 65000, 90000,  100000, 109000]
+  },
+  'trisha': {
+    title: "Trisha's TFSA — Portfolio Value",
+    color: '#ea6c00',
+    labels: ["Jul'23","Dec'23","Dec'24","Now"],
+    actual: [41499, 43563, 58610, 0],
+    contrib:[41499, 41499, 41499, 41499]
+  },
+  'amit-rrsp': {
+    title: "Amit's RRSP — Portfolio Value",
+    color: '#2563eb',
+    labels: ["Aug'22","Jan'23","Apr'26 Now"],
+    actual: [34000, 48500, 0],
+    contrib:[43521, 43521, 43521]
+  },
+  'spousal': {
+    title: "Spousal RRSP — Portfolio Value",
+    color: '#7c3aed',
+    labels: ["2021","2022","2023","2024","Now"],
+    actual: [8583, 9200, 11000, 15500, 0],
+    contrib:[8583, 8583, 8583,  8583,  8583]
+  }
+};
+
+var acctGrowthChart = null;
+
+function buildAcctGrowthChart(acctId){
+  var c  = calcAccounts(VP, FP);
+  var gd = ACCT_GROWTH[acctId];
+  if(!gd) return;
+
+  // Fill live "Now" value
+  var liveVal = {
+    'comb':     c.amitA + c.trishaA,
+    'amit':     c.amitA,
+    'trisha':   c.trishaA,
+    'amit-rrsp':c.rrsp,
+    'spousal':  c.spousal
+  }[acctId] || 0;
+
+  var actualData  = gd.actual.slice();
+  actualData[actualData.length-1] = Math.round(liveVal);
+
+  // Update title
+  var titleEl = el('acct-growth-title');
+  var subEl   = el('acct-growth-sub');
+  if(titleEl) titleEl.textContent = gd.title + ' ●';
+  if(subEl)   subEl.textContent   = 'Value: ' + m$(Math.round(liveVal)) + '  ·  Last point updates live';
+
+  var ctx = el('acct-growth-chart');
+  if(!ctx) return;
+  if(acctGrowthChart) acctGrowthChart.destroy();
+
+  acctGrowthChart = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: gd.labels,
+      datasets: [
+        {
+          label: 'Portfolio Value',
+          data: actualData,
+          borderColor: gd.color,
+          backgroundColor: gd.color + '18',
+          borderWidth: 3,
+          fill: true,
+          pointRadius: 5,
+          pointBackgroundColor: gd.color,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0.4,
+          order: 1
+        },
+        {
+          label: 'Contributed',
+          data: gd.contrib,
+          borderColor: '#b45309',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [5,4],
+          fill: false,
+          pointRadius: 3,
+          pointBackgroundColor: '#b45309',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: 0.3,
+          order: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {mode:'index', intersect:false},
+      plugins: {
+        legend: {
+          display: true,
+          labels: {color:'#6b7499', font:{size:9}, boxWidth:10, usePointStyle:true, pointStyle:'circle'}
+        },
+        tooltip: {
+          backgroundColor:'#fff', borderColor:'#e2e7f5', borderWidth:1,
+          titleColor:'#1a1d3a', bodyColor:'#6b7499', padding:10, cornerRadius:10,
+          callbacks: {
+            label: function(c){ return ' ' + c.dataset.label + ': ' + m$(c.parsed.y); },
+            afterLabel: function(c){
+              if(c.datasetIndex===0){
+                var g = c.parsed.y - gd.contrib[c.dataIndex];
+                return ' Gain: ' + (g>=0?'+':'') + m$(g);
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {grid:{color:'#e2e7f5'}, ticks:{color:'#6b7499',font:{size:9}}},
+        y: {
+          grid: {color:'#e2e7f5'},
+          ticks: {color:'#6b7499', font:{size:9}, callback:function(v){return '$'+(v/1000).toFixed(0)+'k';}}
+        }
+      }
+    }
+  });
+}
+
 // ── FETCH ALL + INIT ──────────────────────────────────────────
 async function fetchAll(){
   var btn = el('refresh-btn');
@@ -1565,6 +1724,8 @@ document.addEventListener('DOMContentLoaded', function(){
   // Start live prices
   fetchAll();
   setInterval(fetchAll, 60000);
+  // Default account growth chart = combined TFSA
+  setTimeout(function(){ buildAcctGrowthChart('comb'); }, 800);
 });
 
 </script>
