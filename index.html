@@ -826,7 +826,7 @@ var B = {
   combVEQT:3018.1818, combVFV:959.9102
 };
 var CONTRIB = {amitTFSA:109000,amitRRSP:43521,trishaTFSA:41499,spousal:8583,total:202603};
-var VP=57.31, FP=173.81, VP_PREV=57.31, FP_PREV=173.81;
+var VP=60.18, FP=185.00, VP_PREV=59.99, FP_PREV=184.00;  // sensible defaults so ticker shows on load
 var curSel='comb', chatHistory=[], chatOpen=false, hidden=false, histFilter='all', txnFilter='all';
 var TXN_KEY='portfolio_txns_v1';
 
@@ -1059,9 +1059,7 @@ function updateLiveValues(){
   var totalVFV=S.amitTFSA_VFV+S.trishaTFSA_VFV;
   var dailyPL=(totalVEQT*(VP-VP_PREV))+(totalVFV*(FP-FP_PREV));
   // Daily % = P&L / yesterday's close value (matches Yahoo Finance calculation)
-  var prevTotal = (S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT)*VP_PREV +
-                  (S.amitTFSA_VFV+S.trishaTFSA_VFV)*FP_PREV +
-                  S.amitTFSA_CASH+S.amitRRSP_CASH+(S.trishaTFSA_CASH||0)+S.spousal_CASH;
+  var prevTotal = (S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT)*VP_PREV;
   var dailyPct = prevTotal>0 ? (dailyPL/prevTotal*100) : 0;
   var dEl=el('tp-daily'),dPct=el('tp-daily-pct'),dSub=el('tp-daily-sub');
   if(dEl){dEl.textContent=(dailyPL>=0?'+':'')+m$(Math.round(dailyPL));dEl.style.color=dailyPL>=0?'#4ade80':'#f87171';}
@@ -1348,7 +1346,7 @@ async function fetchAll(){
   var v=results[0],f=results[1];
   function applyTicker(data,pId,cId){
     if(!data){set(pId,'N/A');set(cId,'···');return;}
-    if(data.prev===data.price||!data.prev){set(pId,m$(data.price,2));set(cId,'···');return;}
+    if(!data.prev){set(pId,m$(data.price,2));set(cId,'···');return;}
     var ch=data.price-data.prev, up=ch>=0;
     var pct=(ch/data.prev*100).toFixed(2);
     var closed = data.state && data.state!=='REGULAR';
