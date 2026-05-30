@@ -256,6 +256,21 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
 
 <!-- BY ACCOUNT BREAKDOWN -->
 <div class="sec">Account Breakdown ●</div>
+<!-- Combined chart quick-view buttons -->
+<div style="display:flex;gap:6px;margin-bottom:10px;">
+  <button onclick="onAccountTileTap('comb')"
+    style="flex:1;padding:6px 4px;font-size:9px;font-weight:700;border-radius:8px;border:1px solid #6366f1;background:#eef2ff;color:#6366f1;cursor:pointer;">
+    📊 Combined TFSAs
+  </button>
+  <button onclick="onAccountTileTap('comb_rrsp')"
+    style="flex:1;padding:6px 4px;font-size:9px;font-weight:700;border-radius:8px;border:1px solid #0ea5e9;background:#f0f9ff;color:#0ea5e9;cursor:pointer;">
+    📊 Combined RRSPs
+  </button>
+  <button onclick="onAccountTileTap('all')"
+    style="flex:1;padding:6px 4px;font-size:9px;font-weight:700;border-radius:8px;border:1px solid #f59e0b;background:#fffbeb;color:#b45309;cursor:pointer;">
+    📊 All Accounts
+  </button>
+</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px" id="account-tiles"></div>
 <div class="txn-section">
   <div class="txn-toggle" onclick="toggleTxn()">
@@ -759,9 +774,14 @@ function renderHistory(){
   var buys=filtered.filter(function(t){return t.type==='buy';});
   var sells=filtered.filter(function(t){return t.type==='sell';});
   set('hs-count',filtered.length+' of '+all.length);
-  set('hs-invested','$'+Math.round(buys.reduce(function(s,t){return s+(t.net||t.total||0);},0)).toLocaleString());
-  set('hs-proceeds','$'+Math.round(sells.reduce(function(s,t){return s+(t.net||t.total||0);},0)).toLocaleString());
-  set('hist-meta',all.length+' trades · TD, Qtrade, Questrade, Wealthsimple');
+  // Exclude internal switches/round-trips from "invested" total
+  var netBuys = buys.filter(function(t){
+    var n=(t.note||'');
+    return !n.match(/switch|round trip|back to/i);
+  });
+  set('hs-invested','$'+Math.round(netBuys.reduce(function(s,t){return s+(t.net||t.total||0);},0)).toLocaleString());
+  set('hs-proceeds','$'+Math.round(sells.filter(function(t){return !(t.note||'').match(/switch|round trip/i);}).reduce(function(s,t){return s+(t.net||t.total||0);},0)).toLocaleString());
+  set('hist-meta',all.length+' trades · TD Direct · Qtrade · Questrade · Wealthsimple');
   var wrap=el('hist-list');
   if(!wrap)return;
   if(!filtered.length){wrap.innerHTML='<div class="txn-empty">No transactions yet</div>';return;}
@@ -933,29 +953,33 @@ function buildTotalLine(){
   var c=calcAccounts(VP,FP);
   var portData=[9253,9253,9253,52400,93300,186400,258500,304000,Math.round(c.total)];
   var contribData=[9017,9017,9017,68796,85271,133333,140333,147333,202603];
-  new Chart(ctx.getContext('2d'),{type:'line',data:{labels:['2018','2019','2020','2021','2022','2023','2024','2025','Now'],datasets:[{label:'Portfolio Value',data:portData,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:contribData,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-contribData[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';}}}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return fmtK(v);}}}}}});
+  new Chart(ctx.getContext('2d'),{type:'line',data:{labels:['2018','2019','2020','2021','2022','2023','2024','2025','Now'],datasets:[{label:'Portfolio Value',data:portData,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:contribData,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-contribData[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';}}}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{min:0,max:500000,grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},stepSize:100000,callback:function(v){return fmtK(v);}}}}}});
 }
 
 // ── PER-ACCOUNT GROWTH CHART ──────────────────────────────────
 var ACCT_GROWTH={
-  'comb':{title:'Combined TFSAs',color:'#6366f1',labels:['2019','2020','2021','2022','2023','2024','Now'],actual:[10200,11800,29500,42100,117400,171000,0],contrib:[9017,9017,16692,33167,81229,88229,102429]},
+  // ── Individual accounts ──
   'amit':{title:"Amit's TFSA",color:'#16a34a',labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[29670,52635,102980,127955,0],contrib:[16692,33167,59167,65167,109000]},
   'trisha':{title:"Trisha's TFSA",color:'#ea6c00',labels:["Jul'23","Dec'23","Dec'24","Now"],actual:[41499,43563,58610,0],contrib:[41499,41499,41499,41499]},
-  'rrsp':{title:"Amit's RRSP",color:'#2563eb',labels:["Aug'22","Dec'22","Dec'23","Dec'24","Now"],actual:[12193,34000,48500,72000,0],contrib:[16692,35000,43521,43521,43521]},
-  'spousal':{title:"Spousal RRSP",color:'#7c3aed',labels:['2021','2022','2023','2024','Now'],actual:[8583,9200,11000,15500,0],contrib:[8583,8583,8583,8583,8583]},
+  'rrsp':{title:"Amit's RRSP",color:'#2563eb',labels:["Jun'21","Dec'22","Dec'23","Dec'24","Jan'26","Now"],actual:[1807,16236,19047,24014,80579,0],contrib:[1807,16135,16974,17011,43521,43521]},
+  'spousal':{title:"Spousal RRSP",color:'#7c3aed',labels:["Jan'21","Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[8583,11321,10806,12275,15714,0],contrib:[8583,8583,8583,8583,8583,8583]},
+  // ── Combined views ──
+  'comb':{title:'Combined TFSAs (Amit + Trisha)',color:'#6366f1',labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[29670,52635,146543,186565,0],contrib:[16692,33167,100728,106667,150499]},
+  'comb_rrsp':{title:'Combined RRSPs (Amit + Spousal)',color:'#0ea5e9',labels:["Jun'21","Dec'22","Dec'23","Dec'24","Jan'26","Now"],actual:[10390,27042,31322,39728,96293,0],contrib:[10390,24718,25557,25594,52104,52104]},
+  'all':{title:'All 4 Accounts Combined',color:'#f59e0b',labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[52400,93300,177865,226293,0],contrib:[68796,85271,133333,140333,202603]},
 };
 var acctGrowthChart=null;
 function buildAcctGrowthChart(id){
   var c=calcAccounts(VP,FP);
   var gd=ACCT_GROWTH[id];if(!gd)return;
-  var lv={'comb':c.amitA+c.trishaA,'amit':c.amitA,'trisha':c.trishaA,'rrsp':c.rrsp,'spousal':c.spousal}[id]||0;
+  var lv={'comb':c.amitA+c.trishaA,'comb_rrsp':c.rrsp+c.spousal,'all':c.total,'amit':c.amitA,'trisha':c.trishaA,'rrsp':c.rrsp,'spousal':c.spousal}[id]||0;
   var actualData=gd.actual.slice();actualData[actualData.length-1]=Math.round(lv);
   var titleEl=el('acct-growth-title'),subEl=el('acct-growth-sub');
   if(titleEl)titleEl.textContent=gd.title+' \u25CF';
   if(subEl)subEl.textContent='Value: '+m$(Math.round(lv))+'  \u00b7  Live';
   var ctx=el('acct-growth-chart');if(!ctx)return;
   if(acctGrowthChart)acctGrowthChart.destroy();
-  acctGrowthChart=new Chart(ctx.getContext('2d'),{type:'line',data:{labels:gd.labels,datasets:[{label:'Portfolio Value',data:actualData,borderColor:gd.color,backgroundColor:gd.color+'18',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:gd.color,pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:gd.contrib,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-gd.contrib[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';} }}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},callback:function(v){return fmtK(v);}}}}  }});
+  acctGrowthChart=new Chart(ctx.getContext('2d'),{type:'line',data:{labels:gd.labels,datasets:[{label:'Portfolio Value',data:actualData,borderColor:gd.color,backgroundColor:gd.color+'18',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:gd.color,pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:gd.contrib,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-gd.contrib[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';} }}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{min:0,max:500000,grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},stepSize:100000,callback:function(v){return fmtK(v);}}}}}});
 }
 
 // ── ACCOUNT TILES ─────────────────────────────────────────────
@@ -1015,7 +1039,11 @@ function updateLiveValues(){
   var totalVEQT=S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT;
   var totalVFV=S.amitTFSA_VFV+S.trishaTFSA_VFV;
   var dailyPL=(totalVEQT*(VP-VP_PREV))+(totalVFV*(FP-FP_PREV));
-  var dailyPct=(c.total-dailyPL)>0?(dailyPL/(c.total-dailyPL)*100):0;
+  // Daily % = P&L / yesterday's close value (matches Yahoo Finance calculation)
+  var prevTotal = (S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT)*VP_PREV +
+                  (S.amitTFSA_VFV+S.trishaTFSA_VFV)*FP_PREV +
+                  S.amitTFSA_CASH+S.amitRRSP_CASH+(S.trishaTFSA_CASH||0)+S.spousal_CASH;
+  var dailyPct = prevTotal>0 ? (dailyPL/prevTotal*100) : 0;
   var dEl=el('tp-daily'),dPct=el('tp-daily-pct'),dSub=el('tp-daily-sub');
   if(dEl){dEl.textContent=(dailyPL>=0?'+':'')+m$(Math.round(dailyPL));dEl.style.color=dailyPL>=0?'#4ade80':'#f87171';}
   if(dPct){dPct.textContent=(dailyPct>=0?'+':'')+dailyPct.toFixed(2)+'%';dPct.style.color=dailyPL>=0?'#4ade80':'#f87171';}
@@ -1051,7 +1079,7 @@ function fetchPrice(sym){
   var v7='https://query2.finance.yahoo.com/v7/finance/quote?symbols='+sym+ts;
   var v8='https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=5d'+ts;
   function parseV7(d){var q=d.quoteResponse.result[0];return{price:q.regularMarketPrice,prev:q.regularMarketPreviousClose};}
-  function parseV8(d){var m=d.chart.result[0].meta;return{price:m.regularMarketPrice,prev:m.chartPreviousClose};}
+  function parseV8(d){var m=d.chart.result[0].meta;return{price:m.regularMarketPrice,prev:m.regularMarketPreviousClose||m.chartPreviousClose};}
   var apis=[
     function(){return tryFetch(v7).then(parseV7);},
     function(){return tryFetch(v8).then(parseV8);},
@@ -1107,7 +1135,9 @@ function buildHistoryTxns(){
   // This mirrors the TRADE_HISTORY inside buildPortfolioContext
   // but as a standalone array for the Transaction History panel
   var TH = [
-    {date:"2018-04-13",account:"Amit TFSA",broker:"Wealthsimple Robo",type:"buy",sym:"VEQT",q:383,p:23.54,net:9017},
+    // ── 2018 WS Robo Multi-ETF Portfolio (actual Wealthsimple trades) ──
+    {date:"2018-04-18",account:"Amit TFSA",broker:"Wealthsimple Robo",type:"buy",sym:"ZHY+VTI+XIC+XSH+IEFA+IEMG+ZFM+PDF+PHR",q:1,p:9017,net:9017,note:"WS Robo portfolio opening — 9 ETFs"},
+    {date:"2018-09-17",account:"Amit TFSA",broker:"Wealthsimple Robo",type:"sell",sym:"ZHY+VTI+XIC+XSH+IEFA+IEMG+ZFM+PDF+PHR",q:1,p:9244,net:9244,note:"WS Robo full selloff → VEQT transition"},
     {date:"2021-04-27",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:33.84,net:236.90},
     {date:"2021-05-11",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:8,p:32.93,net:263.47},
     {date:"2021-06-08",account:"Amit TFSA",broker:"Questrade",type:"buy",sym:"VEQT",q:7,p:34.14,net:239.00},
@@ -1290,10 +1320,13 @@ async function fetchAll(){
   var results=await Promise.all([fetchPrice('VEQT.TO'),fetchPrice('VFV.TO')]);
   var v=results[0],f=results[1];
   function applyTicker(data,pId,cId){
-    if(!data){set(pId,'N/A');set(cId,'');return;}
-    var ch=data.price-data.prev,up=ch>=0;
-    set(pId,m$(data.price,2),up?'var(--green)':'var(--red)');
-    set(cId,(up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+(ch/data.prev*100).toFixed(2)+'%)',up?'var(--green)':'var(--red)');
+    if(!data){set(pId,'N/A');set(cId,'···');return;}
+    // Sanity: prev should never equal price exactly (means stale/bad data)
+    if(data.prev===data.price||!data.prev){set(pId,m$(data.price,2));set(cId,'···');return;}
+    var ch=data.price-data.prev, up=ch>=0;
+    var pct=(ch/data.prev*100).toFixed(2);
+    set(pId,m$(data.price,2),'#ffffff');
+    set(cId,(up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+pct+'%)',up?'#4ade80':'#f87171');
   }
   applyTicker(v,'veqt-p','veqt-c');
   applyTicker(f,'vfv-p','vfv-c');
