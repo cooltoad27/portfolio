@@ -809,16 +809,16 @@ function fmtK(v){return '$'+(v/1000).toFixed(0)+'k';}
 
 // ── SHARE COUNTS ─────────────────────────────────────────────
 var S = {
-  amitTFSA_VEQT:   3341.08964,
-  amitTFSA_VFV:    4.840,
-  amitTFSA_CASH:   17.49,
-  trishaTFSA_VEQT: 1172.820,
-  trishaTFSA_VFV:  4.998,
-  trishaTFSA_CASH: 23.65,
-  amitRRSP_VEQT:   1443.71,
-  amitRRSP_CASH:   0.09,
-  spousal_VEQT:    341.00,
-  spousal_CASH:    50.54
+  amitTFSA_VEQT:   3341.09,  // Yahoo entry
+  amitTFSA_VFV:    0,
+  amitTFSA_CASH:   0,   // excluded to match Yahoo
+  trishaTFSA_VEQT: 1172.82,  // Yahoo entry
+  trishaTFSA_VFV:  0,
+  trishaTFSA_CASH: 0,   // excluded to match Yahoo
+  amitRRSP_VEQT:   1443.71,  // Yahoo entry
+  amitRRSP_CASH:   0,   // excluded to match Yahoo
+  spousal_VEQT:    341.00,  // Yahoo entry
+  spousal_CASH:    0    // excluded to match Yahoo
 };
 var B = {
   amitVEQT:3284.3483, amitVFV:564.6798,
@@ -835,10 +835,10 @@ function saveTxns(arr){localStorage.setItem(TXN_KEY,JSON.stringify(arr));}
 
 // ── ACCOUNT CALCULATIONS ──────────────────────────────────────
 function calcAccounts(V,F){
-  var amitA  = S.amitTFSA_VEQT*V + S.amitTFSA_VFV*F + S.amitTFSA_CASH;
-  var rrsp   = S.amitRRSP_VEQT*V + S.amitRRSP_CASH;
-  var trishaA= (S.trishaTFSA_VEQT||0)*V + S.trishaTFSA_VFV*F + S.trishaTFSA_CASH;
-  var spousal= S.spousal_VEQT*V + S.spousal_CASH;
+  var amitA  = S.amitTFSA_VEQT*V + S.amitTFSA_VFV*F;
+  var rrsp   = S.amitRRSP_VEQT*V;
+  var trishaA= (S.trishaTFSA_VEQT||0)*V + S.trishaTFSA_VFV*F;
+  var spousal= S.spousal_VEQT*V;
   var total  = amitA+rrsp+trishaA+spousal;
   var amitVEQT=B.amitVEQT*V, amitVFV=B.amitVFV*F;
   var trishaVEQT=B.trishaVEQT*V, trishaVFV=B.trishaVFV*F;
@@ -958,15 +958,33 @@ function buildTotalLine(){
 
 // ── PER-ACCOUNT GROWTH CHART ──────────────────────────────────
 var ACCT_GROWTH={
-  // ── Individual accounts ──
-  'amit':{title:"Amit's TFSA",color:'#16a34a',labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[29670,52635,102980,127955,0],contrib:[16692,33167,59167,65167,109000]},
-  'trisha':{title:"Trisha's TFSA",color:'#ea6c00',labels:["Jul'23","Dec'23","Dec'24","Now"],actual:[41499,43563,58610,0],contrib:[41499,41499,41499,41499]},
-  'rrsp':{title:"Amit's RRSP",color:'#2563eb',labels:["Jun'21","Dec'22","Dec'23","Dec'24","Jan'26","Now"],actual:[1807,16236,19047,24014,80579,0],contrib:[1807,16135,16974,17011,43521,43521]},
-  'spousal':{title:"Spousal RRSP",color:'#7c3aed',labels:["Jan'21","Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[8583,11321,10806,12275,15714,0],contrib:[8583,8583,8583,8583,8583,8583]},
+  // ── Individual accounts ── (yMax sets chart ceiling)
+  'amit':{title:"Amit's TFSA",color:'#16a34a',yMax:500000,
+    labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],
+    actual:[53614,48578,150475,127955,0],
+    contrib:[25709,33167,59167,109000,109000]},
+  'trisha':{title:"Trisha's TFSA",color:'#ea6c00',yMax:100000,
+    labels:["Jul'23","Dec'23","Dec'24","Now"],
+    actual:[41499,43682,43650,0],
+    contrib:[41499,41499,41499,41499]},
+  'rrsp':{title:"Amit's RRSP",color:'#2563eb',yMax:125000,
+    labels:["Jun'21","Dec'22","Dec'23","Dec'24","Jan'26","Now"],
+    actual:[1807,16138,19099,24014,80559,0],
+    contrib:[1807,16135,16974,17011,43521,43521]},
+  'spousal':{title:"Spousal RRSP",color:'#7c3aed',yMax:50000,
+    labels:["Jan'21","Dec'21","Dec'22","Dec'23","Dec'24","Now"],
+    actual:[8583,11710,10741,12308,15723,0],
+    contrib:[8583,8583,8583,8583,8583,8583]},
   // ── Combined views ──
-  'comb':{title:'Combined TFSAs (Amit + Trisha)',color:'#6366f1',labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[29670,52635,146543,186565,0],contrib:[16692,33167,100728,106667,150499]},
+  'comb':{title:'Combined TFSAs (Amit + Trisha)',color:'#6366f1',yMax:500000,
+    labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],
+    actual:[53614,48578,194157,171605,0],
+    contrib:[25709,33167,100666,150499,150499]},
   'comb_rrsp':{title:'Combined RRSPs (Amit + Spousal)',color:'#0ea5e9',labels:["Jun'21","Dec'22","Dec'23","Dec'24","Jan'26","Now"],actual:[10390,27042,31322,39728,96293,0],contrib:[10390,24718,25557,25594,52104,52104]},
-  'all':{title:'All 4 Accounts Combined',color:'#f59e0b',labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],actual:[52400,93300,177865,226293,0],contrib:[68796,85271,133333,140333,202603]},
+  'all':{title:'All 4 Accounts Combined',color:'#f59e0b',yMax:500000,
+    labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],
+    actual:[64004,75457,225564,211342,0],
+    contrib:[34292,41750,126223,158103,202603]},
 };
 var acctGrowthChart=null;
 function buildAcctGrowthChart(id){
@@ -979,7 +997,7 @@ function buildAcctGrowthChart(id){
   if(subEl)subEl.textContent='Value: '+m$(Math.round(lv))+'  \u00b7  Live';
   var ctx=el('acct-growth-chart');if(!ctx)return;
   if(acctGrowthChart)acctGrowthChart.destroy();
-  acctGrowthChart=new Chart(ctx.getContext('2d'),{type:'line',data:{labels:gd.labels,datasets:[{label:'Portfolio Value',data:actualData,borderColor:gd.color,backgroundColor:gd.color+'18',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:gd.color,pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:gd.contrib,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-gd.contrib[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';} }}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{min:0,max:500000,grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},stepSize:100000,callback:function(v){return fmtK(v);}}}}}});
+  acctGrowthChart=new Chart(ctx.getContext('2d'),{type:'line',data:{labels:gd.labels,datasets:[{label:'Portfolio Value',data:actualData,borderColor:gd.color,backgroundColor:gd.color+'18',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:gd.color,pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:gd.contrib,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-gd.contrib[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';} }}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{min:0,max:gd.yMax||500000,grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},stepSize:Math.round((gd.yMax||500000)/5),callback:function(v){return fmtK(v);}}}}}});
 }
 
 // ── ACCOUNT TILES ─────────────────────────────────────────────
@@ -1026,7 +1044,8 @@ function updateLiveValues(){
   set('tp-gain',(gain>=0?'+':'')+m$(Math.round(gain))+' ('+(((total/CONTRIB.total)-1)*100).toFixed(1)+'%)', gain>=0?'#4ade80':'#f87171');
   // tp-mult removed
   set('tp-sub','Live \u00b7 Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
-  set('last-updated','Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+  var isOpen = v && v.state === 'REGULAR';
+  set('last-updated', (isOpen?'Live · ':'Closed · ')+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
 
   // Hero VEQT tile
   if(VP){
@@ -1078,8 +1097,16 @@ function fetchPrice(sym){
   var ts='&_='+Date.now();
   var v7='https://query2.finance.yahoo.com/v7/finance/quote?symbols='+sym+ts;
   var v8='https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=5d'+ts;
-  function parseV7(d){var q=d.quoteResponse.result[0];return{price:q.regularMarketPrice,prev:q.regularMarketPreviousClose};}
-  function parseV8(d){var m=d.chart.result[0].meta;return{price:m.regularMarketPrice,prev:m.regularMarketPreviousClose||m.chartPreviousClose};}
+  function parseV7(d){
+    var q=d.quoteResponse.result[0];
+    var mktState = q.marketState || 'REGULAR';
+    // Always use regularMarketPrice (official TSX close) — never post/pre market
+    // This matches exactly what Yahoo Finance Portfolio displays
+    var price = q.regularMarketPrice;
+    var prev  = q.regularMarketPreviousClose;
+    return{price:price, prev:prev, state:mktState};
+  }
+  function parseV8(d){var m=d.chart.result[0].meta;return{price:m.regularMarketPrice,prev:m.regularMarketPreviousClose||m.chartPreviousClose,state:m.currentTradingPeriod?'CHECK':'REGULAR'};}
   var apis=[
     function(){return tryFetch(v7).then(parseV7);},
     function(){return tryFetch(v8).then(parseV8);},
@@ -1321,18 +1348,19 @@ async function fetchAll(){
   var v=results[0],f=results[1];
   function applyTicker(data,pId,cId){
     if(!data){set(pId,'N/A');set(cId,'···');return;}
-    // Sanity: prev should never equal price exactly (means stale/bad data)
     if(data.prev===data.price||!data.prev){set(pId,m$(data.price,2));set(cId,'···');return;}
     var ch=data.price-data.prev, up=ch>=0;
     var pct=(ch/data.prev*100).toFixed(2);
+    var closed = data.state && data.state!=='REGULAR';
     set(pId,m$(data.price,2),'#ffffff');
-    set(cId,(up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+pct+'%)',up?'#4ade80':'#f87171');
+    set(cId,(up?'+':'')+ch.toFixed(2)+' ('+(up?'+':'')+pct+'%)'+(closed?' · Close':''),up?'#4ade80':'#f87171');
   }
   applyTicker(v,'veqt-p','veqt-c');
   applyTicker(f,'vfv-p','vfv-c');
   if(v){VP=v.price;VP_PREV=v.prev;}
   if(f){FP=f.price;FP_PREV=f.prev;}
-  set('last-updated','Updated '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+  var isOpen = v && v.state === 'REGULAR';
+  set('last-updated', (isOpen?'Live · ':'Closed · ')+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
   updateLiveValues();
   if(btn){btn.textContent='\u21BB';btn.disabled=false;btn.style.opacity='1';}
 }
