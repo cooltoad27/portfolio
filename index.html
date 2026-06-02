@@ -225,6 +225,21 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono','Fira Co
   </div>
 </div>
 
+<!-- VEQT PRICE STRIP -->
+<div class="price-strip" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+  <div class="ptile">
+    <div class="ptile-sym">VEQT.TO ●</div>
+    <div class="ptile-price" id="veqt-p"><span class="blink">···</span></div>
+    <div class="ptile-chg" id="veqt-c"></div>
+    <div style="font-size:8px;color:var(--dim);margin-top:2px;" id="mkt-state"></div>
+  </div>
+  <div class="ptile" style="cursor:pointer;" onclick="switchChartTab('total')">
+    <div class="ptile-sym">6,298.62 VEQT</div>
+    <div class="ptile-price" id="veqt-val">···</div>
+    <div style="font-size:9px;color:var(--muted);">Total VEQT value</div>
+  </div>
+</div>
+
 <!-- COMBINED GROWTH CHART SECTION -->
 <div class="sec">Portfolio Growth Over Time</div>
 <div class="sec-sub">All 4 accounts combined · last point live · tap an account below to see per-account view</div>
@@ -951,9 +966,99 @@ function buildTotalLine(){
   var ctx=el('total-line-chart');if(!ctx)return;
   var ex=Chart.getChart(ctx);if(ex)ex.destroy();
   var c=calcAccounts(VP,FP);
-  var portData=[9253,9253,9253,52400,93300,186400,258500,304000,Math.round(c.total)];
-  var contribData=[9017,9017,9017,68796,85271,133333,140333,147333,202603];
-  new Chart(ctx.getContext('2d'),{type:'line',data:{labels:['2018','2019','2020','2021','2022','2023','2024','2025','Now'],datasets:[{label:'Portfolio Value',data:portData,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.08)',borderWidth:3,fill:true,pointRadius:5,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,order:1},{label:'Contributed',data:contribData,borderColor:'#b45309',backgroundColor:'transparent',borderWidth:2,borderDash:[5,4],fill:false,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,order:2}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);},afterLabel:function(c){if(c.datasetIndex===0){var g=c.parsed.y-contribData[c.dataIndex];return' Gain: '+(g>=0?'+':'')+m$(g);}return'';}}}},scales:{x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},y:{min:0,max:500000,grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},stepSize:100000,callback:function(v){return fmtK(v);}}}}}});
+
+  // Per-account year-end values (aligned to shared labels)
+  // Labels: 2018,2019,2020,2021,2022,2023,2024,2025,Now
+  var amitData    = [9253, 9253, 9253, 53614, 48578,150475,127955,148000, Math.round(c.amitA)];
+  var trishaData  = [0,    0,    0,    0,     0,    43682, 43650, 63500,  Math.round(c.trishaA)];
+  var rrspData    = [0,    0,    0,    1807,  16138,19099, 24014, 75000,  Math.round(c.rrsp)];
+  var spousalData = [8583, 8583, 8583, 11710, 10741,12308, 15723, 17500,  Math.round(c.spousal)];
+  var totalData   = amitData.map(function(_,i){return amitData[i]+trishaData[i]+rrspData[i]+spousalData[i];});
+  var contribData = [9017,9017,9017,68796,85271,133333,140333,147333,202603];
+
+  window._totalLineChart = new Chart(ctx.getContext('2d'),{
+    type:'line',
+    data:{
+      labels:['2018','2019','2020','2021','2022','2023','2024','2025','Now'],
+      datasets:[
+        {label:'Amit TFSA',   data:amitData,    borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,.06)',  borderWidth:2,fill:false,pointRadius:4,pointBackgroundColor:'#16a34a',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,acctId:'amit'},
+        {label:'Trisha TFSA', data:trishaData,  borderColor:'#ea6c00',backgroundColor:'rgba(234,108,0,.06)',  borderWidth:2,fill:false,pointRadius:4,pointBackgroundColor:'#ea6c00',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,acctId:'trisha'},
+        {label:'Amit RRSP',   data:rrspData,    borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.06)',  borderWidth:2,fill:false,pointRadius:4,pointBackgroundColor:'#2563eb',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,acctId:'rrsp'},
+        {label:'Spousal RRSP',data:spousalData, borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,.06)',borderWidth:2,fill:false,pointRadius:4,pointBackgroundColor:'#7c3aed',pointBorderColor:'#fff',pointBorderWidth:2,tension:.4,acctId:'spousal'},
+        {label:'Total',data:totalData,borderColor:'#d97706',backgroundColor:'rgba(217,119,6,.07)',borderWidth:2.5,fill:true,pointRadius:3,pointBackgroundColor:'#d97706',pointBorderColor:'#fff',pointBorderWidth:1,tension:.4,acctId:'total'},
+        {label:'Contributed',data:contribData,borderColor:'#b45309',backgroundColor:'rgba(180,83,9,.10)',borderWidth:2,fill:true,pointRadius:3,pointBackgroundColor:'#b45309',pointBorderColor:'#fff',pointBorderWidth:1,borderDash:[5,4],tension:.3,acctId:'contrib'}
+      ]
+    },
+    options:{
+      responsive:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:true,labels:{color:'#6b7499',font:{size:9},boxWidth:10,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{...TT,callbacks:{label:function(c){return' '+c.dataset.label+': '+m$(c.parsed.y);}}}
+      },
+      scales:{
+        x:{grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9}}},
+        y:{min:0,max:500000,grid:{color:GRID},ticks:{color:'#6b7499',font:{size:9},stepSize:100000,callback:function(v){return fmtK(v);}}}
+      }
+    }
+  });
+}
+
+// Highlight an account in the total portfolio chart + shake animation
+function highlightInTotalChart(acctId){
+  var chart = window._totalLineChart;
+  if(!chart) return;
+  var acctMap = {
+    amit:'Amit TFSA', trisha:'Trisha TFSA',
+    rrsp:'Amit RRSP', spousal:'Spousal RRSP',
+    comb:'Amit TFSA', comb_rrsp:'Amit RRSP', all:null
+  };
+  var targetLabel = acctMap[acctId];
+  chart.data.datasets.forEach(function(ds){
+    if(!targetLabel || ds.label===targetLabel){
+      ds.borderWidth = 4;
+      ds.pointRadius = 6;
+      ds.borderColor = ds.borderColor.replace(/rgba?\([^)]+\)/,ds.borderColor);
+    } else {
+      ds.borderWidth = 1;
+      ds.pointRadius = 2;
+      // Dim other lines
+      var origColor = {
+        'Amit TFSA':'#16a34a','Trisha TFSA':'#ea6c00',
+        'Amit RRSP':'#2563eb','Spousal RRSP':'#7c3aed','Total':'#d97706','Contributed':'#b45309'
+      }[ds.label]||'#94a3b8';
+      ds.borderColor = origColor+'55';  // 33% opacity
+    }
+  });
+  chart.update('none');
+
+  // Shake the canvas
+  var canvas = el('total-line-chart');
+  if(canvas){
+    canvas.style.transition='transform 0.1s';
+    canvas.style.transform='translateX(-4px)';
+    setTimeout(function(){canvas.style.transform='translateX(4px)';},100);
+    setTimeout(function(){canvas.style.transform='translateX(-3px)';},200);
+    setTimeout(function(){canvas.style.transform='translateX(3px)';},300);
+    setTimeout(function(){canvas.style.transform='translateX(0)';},400);
+    // Reset highlight after 3 seconds
+    setTimeout(function(){resetTotalChartHighlight();},3000);
+  }
+}
+
+function resetTotalChartHighlight(){
+  var chart = window._totalLineChart;
+  if(!chart) return;
+  var colors = {
+    'Amit TFSA':'#16a34a','Trisha TFSA':'#ea6c00',
+    'Amit RRSP':'#2563eb','Spousal RRSP':'#7c3aed','Total':'#d97706','Contributed':'#b45309'
+  };
+  chart.data.datasets.forEach(function(ds){
+    ds.borderWidth = 2;
+    ds.pointRadius = (ds.label==='Total'||ds.label==='Contributed')?3:4;
+    ds.borderColor = colors[ds.label]||'#94a3b8';
+  });
+  chart.update('none');
 }
 
 // ── PER-ACCOUNT GROWTH CHART ──────────────────────────────────
@@ -976,11 +1081,11 @@ var ACCT_GROWTH={
     actual:[8583,11710,10741,12308,15723,0],
     contrib:[8583,8583,8583,8583,8583,8583]},
   // ── Combined views ──
-  'comb':{title:'Combined TFSAs (Amit + Trisha)',color:'#6366f1',yMax:500000,
+  'comb':{title:'Combined TFSAs (Amit + Trisha)',color:'#6366f1',yMax:400000,
     labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],
     actual:[53614,48578,194157,171605,0],
     contrib:[25709,33167,100666,150499,150499]},
-  'comb_rrsp':{title:'Combined RRSPs (Amit + Spousal)',color:'#0ea5e9',labels:["Jun'21","Dec'22","Dec'23","Dec'24","Jan'26","Now"],actual:[10390,27042,31322,39728,96293,0],contrib:[10390,24718,25557,25594,52104,52104]},
+  'comb_rrsp':{title:'Combined RRSPs (Amit + Spousal)',color:'#0ea5e9',yMax:150000,labels:["Jun'21","Dec'22","Dec'23","Dec'24","Jan'26","Now"],actual:[10390,27042,31322,39728,96293,0],contrib:[10390,24718,25557,25594,52104,52104]},
   'all':{title:'All 4 Accounts Combined',color:'#f59e0b',yMax:500000,
     labels:["Dec'21","Dec'22","Dec'23","Dec'24","Now"],
     actual:[64004,75457,225564,211342,0],
@@ -988,6 +1093,7 @@ var ACCT_GROWTH={
 };
 var acctGrowthChart=null;
 function buildAcctGrowthChart(id){
+  if(id==='all'){switchChartTab('total');window.scrollTo({top:0,behavior:'smooth'});return;}
   var c=calcAccounts(VP,FP);
   var gd=ACCT_GROWTH[id];if(!gd)return;
   var lv={'comb':c.amitA+c.trishaA,'comb_rrsp':c.rrsp+c.spousal,'all':c.total,'amit':c.amitA,'trisha':c.trishaA,'rrsp':c.rrsp,'spousal':c.spousal}[id]||0;
@@ -1062,8 +1168,8 @@ function updateLiveValues(){
   var prevTotal = (S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT)*VP_PREV;
   var dailyPct = prevTotal>0 ? (dailyPL/prevTotal*100) : 0;
   var dEl=el('tp-daily'),dPct=el('tp-daily-pct'),dSub=el('tp-daily-sub');
-  if(dEl){dEl.textContent=(dailyPL>=0?'+':'')+m$(Math.round(dailyPL));dEl.style.color=dailyPL>=0?'#4ade80':'#f87171';}
-  if(dPct){dPct.textContent=(dailyPct>=0?'+':'')+dailyPct.toFixed(2)+'%';dPct.style.color=dailyPL>=0?'#4ade80':'#f87171';}
+  if(dEl){var showPL=(VP!==VP_PREV);dEl.textContent=showPL?(dailyPL>=0?'+':'')+m$(Math.round(dailyPL)):'···';dEl.style.color=dailyPL>=0?'#4ade80':'#f87171';}
+  if(dPct){var showPct=(VP!==VP_PREV);dPct.textContent=showPct?(dailyPct>=0?'+':'')+dailyPct.toFixed(2)+'%':'···';dPct.style.color=dailyPL>=0?'#4ade80':'#f87171';}
   if(dSub)dSub.textContent='Today';
 
   // Account tiles
@@ -1310,18 +1416,11 @@ function switchChartTab(tab){
 
 // ── ACCOUNT TILE TAP → show growth chart ─────────────────────
 function onAccountTileTap(acctId){
-  // Map tile IDs to chart IDs and selector IDs
-  var chartMap = {amit:'amit', trisha:'trisha', rrsp:'amit', spousal:'spousal'};
-  var selMap   = {amit:'amit', trisha:'trisha', rrsp:'comb',  spousal:'comb'};
-  var growthId = chartMap[acctId] || 'amit';
-  // Switch to By Account tab
+  // Highlight this account in the total portfolio chart (with shake)
+  highlightInTotalChart(acctId);
+  // Switch to per-account chart
   switchChartTab('acct');
-  // Update account selector highlight
-  curSel = selMap[acctId] || 'amit';
-  buildSelector();
-  // Show chart
-  buildAcctGrowthChart(growthId);
-  // Scroll to chart
+  buildAcctGrowthChart(acctId);
   var panel = el('chart-panel-acct');
   if(panel) panel.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
@@ -1355,6 +1454,12 @@ async function fetchAll(){
   }
   applyTicker(v,'veqt-p','veqt-c');
   applyTicker(f,'vfv-p','vfv-c');
+  // Update VEQT total value tile
+  if(v){
+    var veqtShares=S.amitTFSA_VEQT+(S.trishaTFSA_VEQT||0)+S.amitRRSP_VEQT+S.spousal_VEQT;
+    var veqtVal=el('veqt-val'); if(veqtVal) veqtVal.textContent=m$(Math.round(veqtShares*v.price));
+    var mktState=el('mkt-state'); if(mktState) mktState.textContent=v.state==='REGULAR'?'Market Open':'Market Closed';
+  }
   if(v){VP=v.price;VP_PREV=v.prev;}
   if(f){FP=f.price;FP_PREV=f.prev;}
   var isOpen = v && v.state === 'REGULAR';
@@ -1374,10 +1479,47 @@ document.addEventListener('DOMContentLoaded',function(){
   buildTotalLine();buildAccountTiles();
   renderTxns();renderHistory();
   fetchAll();
-  setInterval(fetchAll,60000);
+  setInterval(fetchAll,15000);
   setTimeout(function(){buildAcctGrowthChart('comb');},800);
 });
 
 </script>
+
+<!-- CHATBOT FAB -->
+<button class="chat-fab" onclick="toggleChat()" title="Ask about your portfolio">💬</button>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-header">
+    <div class="chat-header-left">
+      <div class="chat-avatar">🤖</div>
+      <div>
+        <div class="chat-title">Portfolio Assistant</div>
+        <div class="chat-subtitle">115 trades · TD, Qtrade, Questrade, Wealthsimple</div>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-suggestions" id="chat-suggestions">
+    <button class="suggestion" onclick="askSuggestion(this)">How much have I made?</button>
+    <button class="suggestion" onclick="askSuggestion(this)">Today's P&amp;L?</button>
+    <button class="suggestion" onclick="askSuggestion(this)">Show my VEQT trades</button>
+    <button class="suggestion" onclick="askSuggestion(this)">XIRR across all accounts?</button>
+    <button class="suggestion" onclick="askSuggestion(this)">May 28 switch details</button>
+    <button class="suggestion" onclick="askSuggestion(this)">Amit vs Trisha performance</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="msg bot">
+      <div class="msg-bubble">👋 Hi! I know all 115 of your trades across TD Direct, Qtrade, Questrade and Wealthsimple — plus live prices. Ask me anything!</div>
+      <div class="msg-time">Portfolio Assistant</div>
+    </div>
+  </div>
+  <div class="chat-input-wrap">
+    <textarea class="chat-input" id="chat-input" placeholder="Ask about your portfolio…" rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+    <button class="chat-send" id="chat-send-btn" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
 </body>
 </html>
